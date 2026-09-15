@@ -1,0 +1,141 @@
+<script setup>
+import { Link, usePage, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+
+const page = usePage();
+const user = computed(() => page.props.auth.admin);
+const flash = computed(() => page.props.flash?.success);
+const showFlash = ref(true);
+const menuOpen = ref(false);
+
+// Local directive: close on outside click.
+const vClickOutside = {
+    mounted(el, binding) {
+        el.__handler = (e) => { if (!el.contains(e.target)) binding.value(e); };
+        document.addEventListener('click', el.__handler, true);
+    },
+    unmounted(el) {
+        document.removeEventListener('click', el.__handler, true);
+    },
+};
+
+const nav = [
+    { label: 'Dashboard', href: '/admin', icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
+    { label: 'Visa Applications', href: '/admin/applications', icon: 'M9 12h6m-6 4h6M5 4h14v16H5z' },
+    { label: 'Leads & Inquiries', href: '/admin/leads', icon: 'M3 8l9 6 9-6M5 5h14v14H5z' },
+    { label: 'Visa Destinations', href: '/admin/visas', icon: 'M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z' },
+    { label: 'Tour Packages', href: '/admin/packages', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
+];
+
+const isActive = (href) =>
+    href === '/admin'
+        ? page.url === '/admin'
+        : page.url.startsWith(href);
+
+function logout() {
+    router.post(route('admin.logout'));
+}
+
+function closeMenu() {
+    menuOpen.value = false;
+}
+</script>
+
+<template>
+    <div class="min-h-screen bg-slate-50">
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
+            <div class="flex h-16 items-center border-b border-slate-100 px-6">
+                <a href="/" class="flex items-center">
+                    <img src="/brand/logo-horizontal.svg" alt="Window Trip" class="h-8 w-auto" />
+                </a>
+            </div>
+            <nav class="flex-1 space-y-1 px-3 py-5">
+                <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Manage</p>
+                <Link
+                    v-for="item in nav"
+                    :key="item.href"
+                    :href="item.href"
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition"
+                    :class="isActive(item.href) ? 'bg-brand-gradient text-white shadow-brand' : 'text-slate-600 hover:bg-slate-100'"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" /></svg>
+                    {{ item.label }}
+                </Link>
+            </nav>
+            <div class="border-t border-slate-100 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
+                        {{ user?.name?.charAt(0) }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="truncate text-sm font-medium text-brand-ink">{{ user?.name }}</div>
+                        <button @click="logout" class="text-xs text-slate-400 hover:text-brand-purple">Sign out</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="lg:pl-64">
+            <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-5 backdrop-blur">
+                <h1 class="font-heading text-lg font-semibold text-brand-ink">
+                    <slot name="title">Admin</slot>
+                </h1>
+                <div class="flex items-center gap-3">
+                    <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-brand-purple">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-9 9M10 5H5v14h14v-5"/></svg>
+                        View site
+                    </a>
+
+                    <!-- Profile dropdown -->
+                    <div class="relative" v-click-outside="closeMenu">
+                        <button @click="menuOpen = !menuOpen" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-slate-100">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">{{ user?.name?.charAt(0) }}</span>
+                            <span class="hidden text-sm font-medium text-brand-ink sm:block">{{ user?.name }}</span>
+                            <svg class="h-4 w-4 text-slate-400 transition" :class="menuOpen && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <transition
+                            enter-active-class="transition duration-150 ease-out" enter-from-class="opacity-0 translate-y-1" enter-to-class="opacity-100 translate-y-0"
+                            leave-active-class="transition duration-100 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
+                            <div v-if="menuOpen" class="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 shadow-brand">
+                                <div class="border-b border-slate-100 px-4 pb-3 pt-1">
+                                    <div class="text-sm font-semibold text-brand-ink">{{ user?.name }}</div>
+                                    <div class="truncate text-xs text-slate-400">{{ user?.email }}</div>
+                                    <span class="mt-1 inline-block rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-medium text-brand-600">Staff</span>
+                                </div>
+                                <Link href="/admin/profile" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50" @click="menuOpen = false">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+                                    My Profile
+                                </Link>
+                                <Link href="/admin/settings" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50" @click="menuOpen = false">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.7-6.7l-1.4 1.4M7.7 16.3l-1.4 1.4m0-12.4l1.4 1.4m9 9l1.4 1.4"/></svg>
+                                    Settings
+                                </Link>
+                                <a href="/" target="_blank" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-9 9M10 5H5v14h14v-5"/></svg>
+                                    View website
+                                </a>
+                                <button @click="logout" class="flex w-full items-center gap-2.5 border-t border-slate-100 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                                    Sign out
+                                </button>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash -->
+            <div v-if="flash && showFlash" class="mx-5 mt-4 flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                {{ flash }}
+                <button @click="showFlash = false" class="text-emerald-500 hover:text-emerald-700">✕</button>
+            </div>
+
+            <main class="p-5 sm:p-7">
+                <slot />
+            </main>
+        </div>
+    </div>
+</template>

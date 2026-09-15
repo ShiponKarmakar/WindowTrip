@@ -1,0 +1,124 @@
+<?php
+
+use App\Http\Controllers\InquiryController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TrackController;
+use App\Http\Controllers\VisaApplicationController;
+use App\Http\Controllers\VisaController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+/*
+|--------------------------------------------------------------------------
+| Public website (Blade — SEO-first)
+|--------------------------------------------------------------------------
+*/
+Route::view('/', 'home')->name('home');
+
+// Visa processing
+Route::get('/visa', [VisaController::class, 'index'])->name('visa.index');
+
+// Multi-step application wizard (declared before the {country} catch-all)
+Route::get('/visa/{country}/apply', [VisaApplicationController::class, 'create'])->name('visa.apply');
+Route::post('/visa/{country}/apply', [VisaApplicationController::class, 'store'])->middleware('throttle:8,1')->name('visa.apply.store');
+Route::get('/visa/{country}/apply/success', [VisaApplicationController::class, 'success'])->name('visa.apply.success');
+
+Route::get('/visa/{country}', [VisaController::class, 'show'])->name('visa.show');
+
+// Air tickets (request-based)
+Route::get('/air-tickets', [InquiryController::class, 'tickets'])->name('tickets.index');
+Route::post('/air-tickets', [InquiryController::class, 'storeTicket'])->middleware('throttle:8,1')->name('tickets.store');
+
+// Tour packages
+Route::get('/packages', [InquiryController::class, 'packages'])->name('packages.index');
+Route::get('/packages/{package:slug}/book', [InquiryController::class, 'bookPackage'])->name('packages.book');
+Route::post('/packages/{package:slug}/book', [InquiryController::class, 'storePackageBooking'])->middleware('throttle:8,1')->name('packages.book.store');
+
+// Contact / general inquiries
+Route::get('/contact', [InquiryController::class, 'contact'])->name('contact');
+Route::post('/contact', [InquiryController::class, 'storeContact'])->middleware('throttle:8,1')->name('contact.store');
+
+// Track application status (public)
+Route::get('/track', [TrackController::class, 'show'])->name('track');
+Route::post('/track', [TrackController::class, 'check'])->middleware('throttle:6,1')->name('track.check');
+
+Route::view('/about', 'home')->name('about');
+
+// Legal
+Route::view('/terms', 'legal.terms')->name('terms');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
+
+/*
+|--------------------------------------------------------------------------
+| Client portal (Inertia + Vue — behind auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    // Only the signed-in user's own applications (match by account, never by
+    // unverified email — otherwise anyone could register with someone's email
+    // and see their applications).
+    $applications = \App\Models\VisaApplication::query()
+        ->where('user_id', $user->id)
+        ->latest()
+        ->get()
+        ->map(fn ($a) => [
+            'reference' => $a->reference,
+            'country' => $a->countryName(),
+            'flag' => $a->countryFlag(),
+            'visa_type' => $a->visa_type,
+            'status' => $a->status,
+            'created' => $a->created_at->format('d M Y'),
+        ]);
+
+    return Inertia::render('Dashboard', ['applications' => $applications]);
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin portal (Inertia + Vue — separate "admin" auth guard)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Staff login (admin guard) — accessible without the customer session
+    Route::get('/login', [\App\Http\Controllers\Admin\AuthController::class, 'create'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\Admin\AuthController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+});
+
+Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::post('/logout', [\App\Http\Controllers\Admin\AuthController::class, 'destroy'])->name('logout');
+    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}/edit', [\App\Http\Controllers\Admin\ApplicationController::class, 'edit'])->name('applications.edit');
+    Route::patch('/applications/{application}', [\App\Http\Controllers\Admin\ApplicationController::class, 'update'])->name('applications.update');
+    Route::get('/applications/{application}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
+    Route::patch('/applications/{application}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.status');
+    Route::get('/applications/{application}/email', [\App\Http\Controllers\Admin\ApplicationController::class, 'compose'])->name('applications.compose');
+    Route::post('/applications/{application}/message', [\App\Http\Controllers\Admin\ApplicationController::class, 'message'])->name('applications.message');
+    Route::get('/applications/{application}/document/{type}', [\App\Http\Controllers\Admin\ApplicationController::class, 'document'])->name('applications.document');
+
+    Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
+    Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Admin\LeadController::class, 'updateStatus'])->name('leads.status');
+
+    // Catalog management
+    Route::resource('visas', \App\Http\Controllers\Admin\VisaCountryController::class)
+        ->parameters(['visas' => 'visa'])->except(['show']);
+    Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class)->except(['show']);
+
+    // Profile & settings
+    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile');
+    Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'edit'])->name('settings');
+    Route::patch('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/test-email', [\App\Http\Controllers\Admin\SettingsController::class, 'test'])->name('settings.test');
+});
+
+require __DIR__.'/auth.php';

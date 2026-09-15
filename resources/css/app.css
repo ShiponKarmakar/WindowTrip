@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+@layer components {
+    /* Soft primary wash behind hero sections (monochrome, no gradient feel) */
+    .brand-mesh {
+        background:
+            radial-gradient(45% 55% at 12% 18%, rgba(19, 157, 213, 0.20), transparent 60%),
+            radial-gradient(45% 55% at 88% 12%, rgba(19, 157, 213, 0.14), transparent 60%),
+            radial-gradient(50% 60% at 70% 88%, rgba(15, 127, 174, 0.12), transparent 62%),
+            #ffffff;
+    }
+    .brand-mesh--dark {
+        background:
+            radial-gradient(45% 60% at 15% 20%, rgba(19, 157, 213, 0.32), transparent 60%),
+            radial-gradient(45% 60% at 85% 15%, rgba(19, 157, 213, 0.20), transparent 60%),
+            radial-gradient(55% 65% at 75% 90%, rgba(15, 127, 174, 0.24), transparent 62%),
+            #0f1f33;
+    }
+
+    /* Solid primary text (no gradient) */
+    .text-gradient {
+        color: #139dd5;
+    }
+
+    /* Thin primary hairline divider */
+    .gradient-rule {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #139dd5, transparent);
+    }
+
+    /* Glassmorphism card */
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .glass-dark {
+        background: rgba(20, 20, 42, 0.55);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* Subtle dot grid background */
+    .dot-grid {
+        background-image: radial-gradient(rgba(19, 157, 213, 0.16) 1px, transparent 1px);
+        background-size: 22px 22px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+ | Scroll reveal. Elements are fully visible by default; they only start
+ | hidden once JS adds `.anim-ready` to <html>, then `.is-in` reveals them.
+ | This guarantees no permanently-blank sections if JS is slow or fails.
+ * ------------------------------------------------------------------------ */
+.anim-ready [data-animate] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+        opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+.anim-ready [data-animate].is-in {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anim-ready [data-animate] {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* Marquee for the trust / logos strip */
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+.animate-marquee {
+    animation: marquee 28s linear infinite;
+}
+
+/* Slow blob drift for decorative shapes */
+@keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(18px, -22px) scale(1.06); }
+    66% { transform: translate(-14px, 12px) scale(0.96); }
+}
+.animate-blob {
+    animation: blob 14s ease-in-out infinite;
+}
