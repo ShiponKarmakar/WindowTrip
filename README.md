@@ -3,7 +3,7 @@
 **Your Complete Travel Partner** — a travel-agency platform for tourist visa processing, air-ticket requests, and tour packages.
 
 ## Stack
-- **Laravel 12** (PHP 8.4) · **MySQL** (prod) / SQLite (local)
+- **Laravel 13** (PHP 8.4) · **MySQL** (prod) / SQLite (local)
 - **Public site:** Blade + Tailwind (SEO-first)
 - **Client portal + Admin:** Inertia.js + Vue 3
 - Auth: Laravel Breeze (customers) + a separate `admin` guard (staff) · Spatie permissions
