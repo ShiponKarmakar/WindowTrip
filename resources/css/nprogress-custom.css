@@ -1,0 +1,62 @@
+/* Modern Theme-Matched NProgress Bar */
+
+#nprogress {
+    pointer-events: none;
+}
+
+#nprogress .bar {
+    background: #139dd5 !important;
+    position: fixed;
+    z-index: 10001;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px !important;
+    box-shadow: 0 0 10px rgba(19, 157, 213, 0.5);
+}
+
+#nprogress .peg {
+    display: block;
+    position: absolute;
+    right: 0px;
+    width: 120px;
+    height: 100%;
+    box-shadow:
+        0 0 14px #139dd5,
+        0 0 8px #139dd5,
+        0 0 4px #139dd5 !important;
+    opacity: 1;
+    -webkit-transform: rotate(3deg) translate(0px, -4px);
+    -ms-transform: rotate(3deg) translate(0px, -4px);
+    transform: rotate(3deg) translate(0px, -4px);
+}
+
+#nprogress .spinner {
+    display: block;
+    position: fixed;
+    z-index: 10001;
+    top: 18px;
+    right: 18px;
+    display: none !important;
+}
+
+#nprogress .spinner-icon {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    border: solid 2.5px transparent;
+    border-top-color: #139dd5 !important;
+    border-left-color: #139dd5 !important;
+    border-radius: 50%;
+    animation: nprogress-spinner 400ms linear infinite;
+}
+
+@keyframes nprogress-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

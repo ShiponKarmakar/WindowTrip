@@ -1,11 +1,14 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { MotionPlugin } from '@vueuse/motion';
+import NProgress from 'nprogress';
+import '../css/nprogress-custom.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Window Trip';
 
@@ -27,3 +30,7 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// ✅ NProgress loader
+router.on('start', () => NProgress.start());
+router.on('finish', () => NProgress.done());
