@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\VisaApplicationAdminAlert;
-use App\Mail\VisaApplicationReceived;
+use App\Models\Setting;
 use App\Models\VisaApplication;
+use App\Models\VisaCountry;
+use App\Notifications\VisaApplicationAdminAlert;
+use App\Notifications\VisaApplicationReceived;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Throwable;
 
 class VisaApplicationController extends Controller
 {
@@ -17,7 +20,7 @@ class VisaApplicationController extends Controller
      */
     public function create(string $country)
     {
-        $config = \App\Models\VisaCountry::config()[$country] ?? null;
+        $config = VisaCountry::config()[$country] ?? null;
         abort_if(! $config, 404);
 
         return Inertia::render('Visa/Apply', [
@@ -43,7 +46,7 @@ class VisaApplicationController extends Controller
      */
     public function store(Request $request, string $country)
     {
-        abort_if(! isset(\App\Models\VisaCountry::config()[$country]), 404);
+        abort_if(! isset(VisaCountry::config()[$country]), 404);
 
         $data = $request->validate([
             'visa_type' => ['required', 'string', 'max:50'],
@@ -88,10 +91,10 @@ class VisaApplicationController extends Controller
 
         // Notify the applicant and the agency (mail driver = log in dev).
         try {
-            $adminEmail = \App\Models\Setting::get('alert_email', config('mail.admin_address'));
-            Mail::to($application->email)->send(new VisaApplicationReceived($application));
-            Mail::to($adminEmail)->send(new VisaApplicationAdminAlert($application));
-        } catch (\Throwable $e) {
+            $adminEmail = Setting::get('alert_email', config('mail.admin_address'));
+            Notification::route('mail', $application->email)->notify(new VisaApplicationReceived($application));
+            Notification::route('mail', $adminEmail)->notify(new VisaApplicationAdminAlert($application));
+        } catch (Throwable $e) {
             report($e); // never block submission on a mail failure
         }
 
@@ -105,7 +108,7 @@ class VisaApplicationController extends Controller
      */
     public function success(string $country)
     {
-        $config = \App\Models\VisaCountry::config()[$country] ?? null;
+        $config = VisaCountry::config()[$country] ?? null;
         abort_if(! $config, 404);
 
         $reference = session('reference');

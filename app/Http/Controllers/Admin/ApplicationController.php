@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\VisaApplication;
+use App\Models\VisaCountry;
+use App\Notifications\ApplicationMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Throwable;
 
 class ApplicationController extends Controller
 {
@@ -40,7 +45,7 @@ class ApplicationController extends Controller
             'applications' => $applications,
             'filters' => $request->only(['status', 'country', 'search']),
             'statuses' => self::STATUSES,
-            'countries' => collect(\App\Models\VisaCountry::config())->map(fn ($v, $slug) => ['slug' => $slug, 'name' => $v['name']])->values(),
+            'countries' => collect(VisaCountry::config())->map(fn ($v, $slug) => ['slug' => $slug, 'name' => $v['name']])->values(),
         ]);
     }
 
@@ -156,9 +161,13 @@ class ApplicationController extends Controller
         ]);
 
         try {
-            \Illuminate\Support\Facades\Mail::to($application->email)
-                ->send(new \App\Mail\ApplicationMessage($application, $data['subject'], $data['body']));
-        } catch (\Throwable $e) {
+            Notification::route('mail', $application->email)
+                ->notify(new ApplicationMessage(
+                $application,
+                $data['subject'],
+                $data['body']
+        ));
+        } catch (Throwable $e) {
             report($e);
 
             return back()->with('success', 'Could not send the email — please check mail settings.');
@@ -175,7 +184,7 @@ class ApplicationController extends Controller
         $path = $type === 'photo' ? $application->photo_path : $application->passport_scan_path;
         abort_if(! $path, 404);
 
-        $disk = \Illuminate\Support\Facades\Storage::disk('local');
+        $disk = Storage::disk('local');
         abort_unless($disk->exists($path), 404);
 
         // Inline view; respects the disk's (private) root regardless of Laravel version.
