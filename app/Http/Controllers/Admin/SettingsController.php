@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Notifications\TestEmailNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
+use Throwable;
 
 class SettingsController extends Controller
 {
@@ -69,11 +71,8 @@ class SettingsController extends Controller
         ]);
 
         try {
-            Mail::raw(
-                "This is a test email from your Window Trip admin panel.\n\nIf you received this, your email settings are working correctly. ✅",
-                fn ($m) => $m->to($data['test_email'])->subject('Window Trip — Test Email')
-            );
-        } catch (\Throwable $e) {
+            Notification::route('mail', $data['test_email'])->notify(new TestEmailNotification());
+        } catch (Throwable $e) {
             report($e);
 
             return back()->with('success', 'Test failed: '.$e->getMessage());

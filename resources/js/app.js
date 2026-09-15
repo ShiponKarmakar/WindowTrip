@@ -1,10 +1,12 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import NProgress from 'nprogress';
+import '../css/nprogress-custom.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Window Trip';
 
@@ -21,7 +23,10 @@ createInertiaApp({
             .use(ZiggyVue)
             .mount(el);
     },
-    progress: {
-        color: '#4B5563',
-    },
+    // Use the custom NProgress bar (below) instead of Inertia's default.
+    progress: false,
 });
+
+// Custom loading bar
+router.on('start', () => NProgress.start());
+router.on('finish', () => NProgress.done());
