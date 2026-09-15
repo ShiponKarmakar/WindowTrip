@@ -3,24 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\VisaCountry;
+use Inertia\Inertia;
 
 class VisaController extends Controller
 {
-    /**
-     * Visa destinations index.
-     */
     public function index()
     {
-        $countries = collect(VisaCountry::publicConfig())->map(function ($data, $slug) {
-            return array_merge($data, ['slug' => $slug]);
-        })->values();
+        $countries = collect(VisaCountry::publicConfig())->map(fn ($data, $slug) => [
+            'slug' => $slug,
+            'name' => $data['name'],
+            'flag' => $data['flag'],
+            'subtitle' => $data['subtitle'],
+            'overview' => $data['overview'],
+            'processing' => $data['processing'],
+            'fee_from' => $data['fee_from'],
+        ])->values();
 
-        return view('visa.index', compact('countries'));
+        return Inertia::render('Public/Visa/Index', ['countries' => $countries]);
     }
 
-    /**
-     * Single country visa page with requirements.
-     */
     public function show(string $country)
     {
         $all = VisaCountry::config();
@@ -30,12 +31,11 @@ class VisaController extends Controller
 
         $data['slug'] = $country;
 
-        // Sibling destinations for the "other countries" strip (active only).
         $others = collect(VisaCountry::publicConfig())
-            ->map(fn ($d, $slug) => array_merge($d, ['slug' => $slug]))
+            ->map(fn ($d, $slug) => ['slug' => $slug, 'name' => $d['name'], 'flag' => $d['flag'], 'processing' => $d['processing']])
             ->reject(fn ($d) => $d['slug'] === $country)
             ->values();
 
-        return view('visa.show', ['country' => $data, 'others' => $others]);
+        return Inertia::render('Public/Visa/Show', ['country' => $data, 'others' => $others]);
     }
 }

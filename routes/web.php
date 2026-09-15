@@ -13,7 +13,16 @@ use Inertia\Inertia;
 | Public website (Blade — SEO-first)
 |--------------------------------------------------------------------------
 */
-Route::view('/', 'home')->name('home');
+Route::get('/', function () {
+    return Inertia::render('Public/Home', [
+        'visas' => collect(\App\Models\VisaCountry::publicConfig())->map(fn ($v, $slug) => [
+            'slug' => $slug, 'name' => $v['name'], 'flag' => $v['flag'],
+            'processing' => $v['processing'], 'fee_from' => $v['fee_from'],
+        ])->values(),
+        'packages' => \App\Models\Package::activeOrdered()->take(3)->get()
+            ->map(fn ($p) => $p->only(['slug', 'title', 'nights', 'price', 'tag', 'color'])),
+    ]);
+})->name('home');
 
 // Visa processing
 Route::get('/visa', [VisaController::class, 'index'])->name('visa.index');
@@ -42,11 +51,11 @@ Route::post('/contact', [InquiryController::class, 'storeContact'])->middleware(
 Route::get('/track', [TrackController::class, 'show'])->name('track');
 Route::post('/track', [TrackController::class, 'check'])->middleware('throttle:6,1')->name('track.check');
 
-Route::view('/about', 'home')->name('about');
+Route::redirect('/about', '/')->name('about');
 
 // Legal
-Route::view('/terms', 'legal.terms')->name('terms');
-Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::get('/terms', fn () => Inertia::render('Public/Legal/Terms'))->name('terms');
+Route::get('/privacy', fn () => Inertia::render('Public/Legal/Privacy'))->name('privacy');
 
 /*
 |--------------------------------------------------------------------------

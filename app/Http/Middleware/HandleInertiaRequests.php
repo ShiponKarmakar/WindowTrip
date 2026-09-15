@@ -40,6 +40,25 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+            // Active visa destinations for the public header dropdown / mobile menu.
+            'navVisas' => fn () => collect(\App\Models\VisaCountry::publicConfig())
+                ->map(fn ($v, $slug) => [
+                    'slug' => $slug,
+                    'name' => $v['name'],
+                    'flag' => $v['flag'],
+                    'processing' => $v['processing'],
+                    'fee_from' => $v['fee_from'],
+                ])->values(),
+            // Company/contact settings used across public footer & pages.
+            'site' => fn () => [
+                'company' => \App\Models\Setting::get('company_name'),
+                'tagline' => \App\Models\Setting::get('tagline'),
+                'email' => \App\Models\Setting::get('support_email'),
+                'phone' => \App\Models\Setting::get('support_phone'),
+                'address' => \App\Models\Setting::get('office_address'),
+                'hours' => \App\Models\Setting::get('office_hours'),
             ],
         ];
     }

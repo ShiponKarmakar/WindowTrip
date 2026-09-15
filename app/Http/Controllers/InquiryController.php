@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class InquiryController extends Controller
 {
     /** Contact page. */
     public function contact()
     {
-        return view('contact');
+        return Inertia::render('Public/Contact');
     }
 
     /** Store a general contact inquiry. */
@@ -32,7 +33,7 @@ class InquiryController extends Controller
     /** Air ticket request page. */
     public function tickets()
     {
-        return view('air-tickets');
+        return Inertia::render('Public/AirTickets');
     }
 
     /** Store an air ticket request as a lead. */
@@ -69,7 +70,10 @@ class InquiryController extends Controller
     /** Tour packages listing. */
     public function packages()
     {
-        return view('packages', ['packages' => \App\Models\Package::activeOrdered()->get()]);
+        return Inertia::render('Public/Packages', [
+            'packages' => \App\Models\Package::activeOrdered()->get()
+                ->map(fn ($p) => $p->only(['slug', 'title', 'destination', 'nights', 'price', 'tag', 'color', 'includes'])),
+        ]);
     }
 
     /** Package booking page. */
@@ -77,7 +81,9 @@ class InquiryController extends Controller
     {
         abort_unless($package->active, 404);
 
-        return view('package-book', ['package' => $package]);
+        return Inertia::render('Public/PackageBook', [
+            'package' => $package->only(['slug', 'title', 'destination', 'nights', 'price', 'tag', 'color', 'includes']),
+        ]);
     }
 
     /** Store a package booking request as a lead. */

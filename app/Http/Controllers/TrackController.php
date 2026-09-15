@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\VisaApplication;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TrackController extends Controller
 {
     /** Show the track-application form. */
     public function show()
     {
-        return view('track', ['application' => null]);
+        return Inertia::render('Public/Track', ['result' => null, 'searched' => false]);
     }
 
     /** Look up an application by reference + email. */
@@ -26,14 +27,10 @@ class TrackController extends Controller
             ->whereRaw('LOWER(email) = ?', [strtolower(trim($data['email']))])
             ->first();
 
-        if (! $application) {
-            return redirect()->route('track')
-                ->withInput()
-                ->with('track_error', 'No application found for that reference and email. Please check and try again.');
-        }
-
-        return view('track', [
-            'application' => [
+        return Inertia::render('Public/Track', [
+            'searched' => true,
+            'old' => ['reference' => $data['reference'], 'email' => $data['email']],
+            'result' => $application ? [
                 'reference' => $application->reference,
                 'name' => $application->full_name,
                 'country' => $application->countryName(),
@@ -42,7 +39,7 @@ class TrackController extends Controller
                 'status' => $application->status,
                 'submitted' => $application->created_at->format('d M Y'),
                 'updated' => $application->updated_at->format('d M Y'),
-            ],
+            ] : null,
         ]);
     }
 }
