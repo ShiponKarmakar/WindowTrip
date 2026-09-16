@@ -43,6 +43,7 @@ const statusBadge = (s) => ({
                     <div class="mt-6 flex flex-wrap gap-3">
                         <a href="/visa" class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-ink hover:-translate-y-0.5 transition">+ New visa application</a>
                         <a href="/packages" class="rounded-full bg-white/15 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/25 transition">Browse packages</a>
+                        <Link :href="route('invoices.index')" class="rounded-full bg-white/15 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/25 transition">My invoices</Link>
                     </div>
                 </div>
 

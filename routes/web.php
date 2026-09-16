@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -98,6 +99,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Customer invoices
+    Route::get('/invoices', [\App\Http\Controllers\PortalInvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}/pdf', [\App\Http\Controllers\PortalInvoiceController::class, 'pdf'])->name('invoices.pdf');
 });
 
 /*
@@ -125,6 +130,19 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
     Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
+
+    // Invoices (order: literal /create before /{invoice})
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::post('/invoices/{invoice}/payment', [InvoiceController::class, 'payment'])->name('invoices.payment');
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
+    Route::post('/invoices/{invoice}/email', [InvoiceController::class, 'email'])->name('invoices.email');
+    Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
     // Catalog management
     Route::resource('visas', VisaCountryController::class)

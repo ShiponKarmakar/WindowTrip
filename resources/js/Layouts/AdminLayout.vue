@@ -23,6 +23,7 @@ const nav = [
     { label: 'Dashboard', href: '/admin', icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
     { label: 'Visa Applications', href: '/admin/applications', icon: 'M9 12h6m-6 4h6M5 4h14v16H5z' },
     { label: 'Leads & Inquiries', href: '/admin/leads', icon: 'M3 8l9 6 9-6M5 5h14v14H5z' },
+    { label: 'Invoices', href: '/admin/invoices', icon: 'M9 12h6m-6 4h6M9 8h6M6 3h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1z' },
     { label: 'Visa Destinations', href: '/admin/visas', icon: 'M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z' },
     { label: 'Tour Packages', href: '/admin/packages', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
 ];

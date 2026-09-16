@@ -123,6 +123,10 @@ const contact = [
                     ✏️ Edit application
                 </Link>
 
+                <Link :href="route('admin.invoices.create', { application: application.id })" class="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
+                    🧾 Create invoice
+                </Link>
+
                 <Link :href="route('admin.applications.compose', application.id)" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-white shadow-brand hover:opacity-90">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>
                     Compose email
