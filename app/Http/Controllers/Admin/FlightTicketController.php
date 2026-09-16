@@ -185,11 +185,15 @@ class FlightTicketController extends Controller
         return back()->with('success', 'Ticket marked as '.$data['status'].'.');
     }
 
-    /** Download the branded WindowTrip e-ticket PDF. */
-    public function pdf(FlightTicket $flightTicket)
+    /** The branded WindowTrip e-ticket PDF — inline for printing (?print=1), else download. */
+    public function pdf(Request $request, FlightTicket $flightTicket)
     {
-        return Pdf::loadView('pdf.ticket', ['ticket' => $flightTicket])
-            ->download($flightTicket->number.'.pdf');
+        $pdf = Pdf::loadView('pdf.ticket', ['ticket' => $flightTicket]);
+        $name = $flightTicket->number.'.pdf';
+
+        return $request->boolean('print')
+            ? $pdf->stream($name)   // inline in the browser's PDF viewer (Ctrl/Cmd+P to print)
+            : $pdf->download($name);
     }
 
     /** Stream the original uploaded ticket (private). */

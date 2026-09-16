@@ -42,6 +42,7 @@ function remove() {
             <Link href="/admin/tickets" class="text-sm font-medium text-slate-500 hover:text-brand-purple">← Back to tickets</Link>
             <div class="flex flex-wrap gap-2">
                 <a :href="route('admin.tickets.pdf', t.id)" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">⬇ WindowTrip PDF</a>
+                <a :href="route('admin.tickets.pdf', { flightTicket: t.id, print: 1 })" target="_blank" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">🖨 Print</a>
                 <a v-if="t.has_source" :href="route('admin.tickets.source', t.id)" target="_blank" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">📎 Original</a>
                 <button @click="emailTicket" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">✉ Email client</button>
                 <Link :href="route('admin.tickets.edit', t.id)" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">✏️ Edit</Link>
