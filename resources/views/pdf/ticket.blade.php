@@ -4,6 +4,8 @@
     $phone = \App\Models\Setting::get('support_phone');
     $address = \App\Models\Setting::get('office_address');
     $primary = '#139dd5';
+    $logo = public_path('brand/logo-horizontal.png');
+    $hasLogo = is_file($logo);
     $fmt = function ($v) {
         if (! $v) return ['date' => '—', 'time' => ''];
         try { $d = \Illuminate\Support\Carbon::parse($v); return ['date' => $d->format('d M Y'), 'time' => $d->format('H:i')]; }
@@ -48,7 +50,11 @@
     <table class="row head">
         <tr>
             <td style="width:60%">
-                <div class="brand">{{ $company }}</div>
+                @if($hasLogo)
+                    <img src="{{ $logo }}" alt="{{ $company }}" style="width:200px; height:auto; margin-bottom:6px">
+                @else
+                    <div class="brand">{{ $company }}</div>
+                @endif
                 <div class="muted">{{ \App\Models\Setting::get('tagline') }}</div>
                 <div class="muted" style="margin-top:8px">{{ $address }}<br>{{ $email }} · {{ $phone }}</div>
             </td>
