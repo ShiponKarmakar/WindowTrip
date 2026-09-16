@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FlightTicketController;
 use App\Http\Controllers\Admin\InvoiceController;
@@ -135,6 +136,15 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
     Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
+
+    // Clients (order: literal /create before /{client})
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::match(['put', 'patch'], '/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
 
     // Invoices (order: literal /create before /{invoice})
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');

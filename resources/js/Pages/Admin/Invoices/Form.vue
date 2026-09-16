@@ -1,5 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import ClientPicker from '@/Components/ClientPicker.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -7,6 +8,7 @@ const props = defineProps({
     invoice: { type: Object, default: null },
     prefill: { type: Object, default: null },
     nextNumber: { type: String, default: '' },
+    clients: { type: Array, default: () => [] },
 });
 
 const isEdit = !!props.invoice;
@@ -17,6 +19,7 @@ const today = new Date().toISOString().slice(0, 10);
 const form = useForm({
     number: inv.number || props.nextNumber || '',
     visa_application_id: inv.visa_application_id ?? pf.visa_application_id ?? null,
+    user_id: inv.user_id ?? pf.user_id ?? null,
     client_name: inv.client_name || pf.client_name || '',
     client_email: inv.client_email || pf.client_email || '',
     client_phone: inv.client_phone || pf.client_phone || '',
@@ -36,6 +39,12 @@ const subtotal = computed(() => form.items.reduce((s, i) => s + (Number(i.qty) |
 const total = computed(() => subtotal.value - (Number(form.discount) || 0) + (Number(form.tax) || 0));
 const money = (n) => Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+function onClientSelect(client) {
+    if (!client) return; // "walk-in" — keep whatever is typed
+    form.client_name = client.name || '';
+    form.client_email = client.email || '';
+    form.client_phone = client.phone || '';
+}
 function addItem() { form.items.push({ description: '', qty: 1, unit_price: 0 }); }
 function submit() {
     const opts = { preserveScroll: true };
@@ -54,6 +63,9 @@ function submit() {
             <!-- Client + meta -->
             <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <h3 class="font-heading font-semibold text-brand-ink">Client & details</h3>
+                <div class="mt-4">
+                    <ClientPicker v-model="form.user_id" :clients="clients" @select="onClientSelect" />
+                </div>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div><label class="lbl">Client name</label><input v-model="form.client_name" class="inp" /><p v-if="form.errors.client_name" class="err">{{ form.errors.client_name }}</p></div>
                     <div><label class="lbl">Client email</label><input v-model="form.client_email" type="email" class="inp" /><p v-if="form.errors.client_email" class="err">{{ form.errors.client_email }}</p></div>

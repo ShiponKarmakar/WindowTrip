@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FlightTicket;
+use App\Models\User;
 use App\Models\VisaApplication;
 use App\Notifications\FlightTicketIssued;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -56,8 +57,10 @@ class FlightTicketController extends Controller
     {
         $prefill = null;
         if ($request->application && $app = VisaApplication::find($request->application)) {
+            $client = User::clients()->where('email', $app->email)->first();
             $prefill = [
                 'visa_application_id' => $app->id,
+                'user_id' => $client?->id,
                 'client_name' => $app->full_name,
                 'client_email' => $app->email,
                 'client_phone' => $app->phone,
@@ -69,6 +72,7 @@ class FlightTicketController extends Controller
             'prefill' => $prefill,
             'nextNumber' => FlightTicket::nextNumber(),
             'statuses' => self::STATUSES,
+            'clients' => $this->clientOptions(),
         ]);
     }
 
@@ -80,7 +84,17 @@ class FlightTicketController extends Controller
             ]),
             'prefill' => null,
             'statuses' => self::STATUSES,
+            'clients' => $this->clientOptions(),
         ]);
+    }
+
+    /** Lightweight client list for the picker. */
+    private function clientOptions()
+    {
+        return User::clients()
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'phone'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone]);
     }
 
     public function store(Request $request)
@@ -197,6 +211,7 @@ class FlightTicketController extends Controller
         return $request->validate([
             'number' => ['nullable', 'string', 'max:40', Rule::unique('flight_tickets', 'number')->ignore($ignore)],
             'visa_application_id' => ['nullable', 'exists:visa_applications,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
             'client_name' => ['required', 'string', 'max:120'],
             'client_email' => ['required', 'email', 'max:120'],
             'client_phone' => ['nullable', 'string', 'max:40'],

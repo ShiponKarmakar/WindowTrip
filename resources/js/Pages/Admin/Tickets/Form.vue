@@ -1,5 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import ClientPicker from '@/Components/ClientPicker.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -7,6 +8,7 @@ const props = defineProps({
     prefill: { type: Object, default: null },
     nextNumber: { type: String, default: '' },
     statuses: { type: Array, default: () => [] },
+    clients: { type: Array, default: () => [] },
 });
 
 const isEdit = !!props.ticket;
@@ -17,6 +19,7 @@ const today = new Date().toISOString().slice(0, 10);
 const form = useForm({
     number: t.number || props.nextNumber || '',
     visa_application_id: t.visa_application_id ?? pf.visa_application_id ?? null,
+    user_id: t.user_id ?? pf.user_id ?? null,
     client_name: t.client_name || pf.client_name || '',
     client_email: t.client_email || pf.client_email || '',
     client_phone: t.client_phone || pf.client_phone || '',
@@ -37,6 +40,12 @@ const form = useForm({
         : [{ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '' }],
 });
 
+function onClientSelect(client) {
+    if (!client) return; // "walk-in" — keep whatever is typed
+    form.client_name = client.name || '';
+    form.client_email = client.email || '';
+    form.client_phone = client.phone || '';
+}
 function addPassenger() { form.passengers.push({ name: '', type: 'adult', ticket_number: '', seat: '' }); }
 function addSegment() { form.segments.push({ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '' }); }
 function onFile(e) { form.source_file = e.target.files[0] || null; }
@@ -71,6 +80,9 @@ function submit() {
             <!-- Booking & client -->
             <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <h3 class="font-heading font-semibold text-brand-ink">Booking & passenger contact</h3>
+                <div class="mt-4">
+                    <ClientPicker v-model="form.user_id" :clients="clients" @select="onClientSelect" />
+                </div>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div><label class="lbl">Booking PNR</label><input v-model="form.pnr" class="inp uppercase" placeholder="e.g. X4Y9ZK" /><p v-if="form.errors.pnr" class="err">{{ form.errors.pnr }}</p></div>
                     <div><label class="lbl">Airline ref <span class="text-slate-400">(optional)</span></label><input v-model="form.booking_ref" class="inp" /></div>

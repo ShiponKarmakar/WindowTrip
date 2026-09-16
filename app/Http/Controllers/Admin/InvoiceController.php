@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\VisaApplication;
 use App\Notifications\InvoiceIssued;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -59,8 +60,11 @@ class InvoiceController extends Controller
     {
         $prefill = null;
         if ($request->application && $app = VisaApplication::find($request->application)) {
+            // Link to an existing client account if one matches the applicant's email.
+            $client = User::clients()->where('email', $app->email)->first();
             $prefill = [
                 'visa_application_id' => $app->id,
+                'user_id' => $client?->id,
                 'client_name' => $app->full_name,
                 'client_email' => $app->email,
                 'client_phone' => $app->phone,
@@ -74,6 +78,7 @@ class InvoiceController extends Controller
             'prefill' => $prefill,
             'currency' => Setting::get('company_name') ? 'BDT' : 'BDT',
             'nextNumber' => Invoice::nextNumber(),
+            'clients' => $this->clientOptions(),
         ]);
     }
 
@@ -82,7 +87,17 @@ class InvoiceController extends Controller
         return Inertia::render('Admin/Invoices/Form', [
             'invoice' => $invoice->append([])->toArray(),
             'prefill' => null,
+            'clients' => $this->clientOptions(),
         ]);
+    }
+
+    /** Lightweight client list for the picker. */
+    private function clientOptions()
+    {
+        return User::clients()
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'phone'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone]);
     }
 
     public function store(Request $request)
@@ -192,6 +207,7 @@ class InvoiceController extends Controller
         return $request->validate([
             'number' => ['nullable', 'string', 'max:40', \Illuminate\Validation\Rule::unique('invoices', 'number')->ignore($ignore)],
             'visa_application_id' => ['nullable', 'exists:visa_applications,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
             'client_name' => ['required', 'string', 'max:120'],
             'client_email' => ['required', 'email', 'max:120'],
             'client_phone' => ['nullable', 'string', 'max:40'],
