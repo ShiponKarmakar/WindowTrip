@@ -37,8 +37,8 @@ const form = useForm({
         ? t.passengers.map((p) => ({ name: p.name || '', type: p.type || 'adult', ticket_number: p.ticket_number || '', seat: p.seat || '' }))
         : [{ name: pf.client_name || '', type: 'adult', ticket_number: '', seat: '' }],
     segments: t.segments?.length
-        ? t.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || '', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '' }))
-        : [{ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '' }],
+        ? t.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || '', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '', cabin_baggage: s.cabin_baggage || '' }))
+        : [{ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '', cabin_baggage: '' }],
 });
 
 function onClientSelect(client) {
@@ -48,7 +48,7 @@ function onClientSelect(client) {
     form.client_phone = client.phone || '';
 }
 function addPassenger() { form.passengers.push({ name: '', type: 'adult', ticket_number: '', seat: '' }); }
-function addSegment() { form.segments.push({ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '' }); }
+function addSegment() { form.segments.push({ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '', cabin_baggage: '' }); }
 const parsing = ref(false);
 const parseMsg = ref('');
 const parseOk = ref(false);
@@ -72,7 +72,7 @@ function applyParsed(d) {
     if (d.client_email && !form.user_id && !form.client_email) form.client_email = d.client_email;
     if (d.client_phone && !form.user_id && !form.client_phone) form.client_phone = d.client_phone;
     if (d.segments?.length) {
-        form.segments = d.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || 'Economy', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '' }));
+        form.segments = d.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || 'Economy', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '', cabin_baggage: s.cabin_baggage || '' }));
     }
 }
 
@@ -179,7 +179,8 @@ function submit() {
                             <div><label class="lbl">Airline</label><input v-model="s.airline" class="inp" :placeholder="form.airline || 'Carrier'" /></div>
                             <div><label class="lbl">Flight no.</label><input v-model="s.flight_number" class="inp uppercase" placeholder="EK585" /></div>
                             <div><label class="lbl">Cabin</label><input v-model="s.cabin" class="inp" placeholder="Economy" /></div>
-                            <div><label class="lbl">Baggage</label><input v-model="s.baggage" class="inp" placeholder="30kg" /></div>
+                            <div><label class="lbl">Check-in bag</label><input v-model="s.baggage" class="inp" placeholder="20kg" /></div>
+                            <div><label class="lbl">Cabin bag</label><input v-model="s.cabin_baggage" class="inp" placeholder="7kg" /></div>
                             <div><label class="lbl">From (code)</label><input v-model="s.from_code" class="inp uppercase" placeholder="DAC" /></div>
                             <div class="sm:col-span-3"><label class="lbl">From (city)</label><input v-model="s.from_city" class="inp" placeholder="Dhaka" /></div>
                             <div><label class="lbl">To (code)</label><input v-model="s.to_code" class="inp uppercase" placeholder="DXB" /></div>

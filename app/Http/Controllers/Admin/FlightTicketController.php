@@ -281,6 +281,7 @@ class FlightTicketController extends Controller
             'segments.*.depart_at' => ['required', 'string', 'max:40'],
             'segments.*.arrive_at' => ['nullable', 'string', 'max:40'],
             'segments.*.baggage' => ['nullable', 'string', 'max:40'],
+            'segments.*.cabin_baggage' => ['nullable', 'string', 'max:40'],
         ]);
     }
 }

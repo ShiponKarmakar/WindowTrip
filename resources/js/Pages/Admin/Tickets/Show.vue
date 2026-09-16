@@ -5,6 +5,7 @@ import { computed } from 'vue';
 
 const props = defineProps({ ticket: Object, statuses: Array });
 const t = computed(() => props.ticket);
+const showSeat = computed(() => (t.value.passengers || []).some((p) => p.seat));
 
 const badge = (s) => ({
     draft: 'bg-slate-100 text-slate-500', issued: 'bg-emerald-50 text-emerald-600',
@@ -82,7 +83,7 @@ function remove() {
                         <div v-for="(s, i) in t.segments" :key="i" class="rounded-xl border border-slate-100 p-4">
                             <div class="mb-3 flex items-center justify-between text-xs">
                                 <span class="font-semibold text-brand-ink">{{ s.airline || t.airline }} · {{ (s.flight_number || '').toUpperCase() }}</span>
-                                <span class="text-slate-400">{{ s.cabin }}<span v-if="s.baggage"> · {{ s.baggage }}</span></span>
+                                <span class="text-slate-400">{{ s.cabin }}<span v-if="s.baggage"> · Check-in {{ s.baggage }}</span><span v-if="s.cabin_baggage"> · Cabin {{ s.cabin_baggage }}</span></span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div>
@@ -106,14 +107,14 @@ function remove() {
                     <h3 class="font-heading font-semibold text-brand-ink">Passengers</h3>
                     <table class="mt-3 w-full text-left text-sm">
                         <thead class="text-xs uppercase tracking-wide text-slate-400">
-                            <tr><th class="py-2">Name</th><th class="py-2">Type</th><th class="py-2">Ticket #</th><th class="py-2">Seat</th></tr>
+                            <tr><th class="py-2">Name</th><th class="py-2">Type</th><th class="py-2">Ticket #</th><th v-if="showSeat" class="py-2">Seat</th></tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr v-for="(p, i) in t.passengers" :key="i">
                                 <td class="py-2 font-medium text-brand-ink">{{ p.name }}</td>
                                 <td class="py-2 capitalize text-slate-600">{{ p.type || 'adult' }}</td>
                                 <td class="py-2 text-slate-600">{{ p.ticket_number || '—' }}</td>
-                                <td class="py-2 text-slate-600">{{ p.seat || '—' }}</td>
+                                <td v-if="showSeat" class="py-2 text-slate-600">{{ p.seat || '—' }}</td>
                             </tr>
                         </tbody>
                     </table>

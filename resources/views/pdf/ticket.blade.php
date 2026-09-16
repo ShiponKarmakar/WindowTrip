@@ -97,7 +97,12 @@
             <div class="top">
                 <span class="fn">{{ $s['airline'] ?? $ticket->airline }} · {{ strtoupper($s['flight_number'] ?? '') }}</span>
                 @if(!empty($s['cabin']))<span class="muted"> — {{ $s['cabin'] }}</span>@endif
-                @if(!empty($s['baggage']))<span class="muted" style="float:right">Baggage: {{ $s['baggage'] }}</span>@endif
+                @php
+                    $bag = [];
+                    if (!empty($s['baggage'])) $bag[] = 'Check-in: '.$s['baggage'];
+                    if (!empty($s['cabin_baggage'])) $bag[] = 'Cabin: '.$s['cabin_baggage'];
+                @endphp
+                @if($bag)<span class="muted" style="float:right">{{ implode(' · ', $bag) }}</span>@endif
             </div>
             <div class="body">
                 <table class="row"><tr>
@@ -118,15 +123,16 @@
     @endforeach
 
     <div style="margin-top:22px" class="section-label">Passengers</div>
+    @php $showSeat = collect($ticket->passengers ?? [])->contains(fn ($p) => ! empty($p['seat'])); @endphp
     <table class="pax">
-        <thead><tr><th style="width:45%">Name</th><th>Type</th><th>Ticket number</th><th>Seat</th></tr></thead>
+        <thead><tr><th style="width:45%">Name</th><th>Type</th><th>Ticket number</th>@if($showSeat)<th>Seat</th>@endif</tr></thead>
         <tbody>
             @foreach($ticket->passengers ?? [] as $p)
                 <tr>
                     <td>{{ $p['name'] ?? '' }}</td>
                     <td>{{ ucfirst($p['type'] ?? 'adult') }}</td>
                     <td>{{ $p['ticket_number'] ?? '—' }}</td>
-                    <td>{{ $p['seat'] ?? '—' }}</td>
+                    @if($showSeat)<td>{{ $p['seat'] ?? '—' }}</td>@endif
                 </tr>
             @endforeach
         </tbody>

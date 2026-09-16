@@ -93,7 +93,8 @@ Return ONLY a JSON object with exactly these keys:
       "to_city": string|null,
       "depart_at": string|null,          // "YYYY-MM-DDTHH:MM" 24h local time, null if unknown
       "arrive_at": string|null,          // "YYYY-MM-DDTHH:MM" 24h local time, null if unknown
-      "baggage": string|null             // check-in baggage e.g. "20kg" (prefer checked over cabin)
+      "baggage": string|null,            // CHECK-IN baggage e.g. "20kg"
+      "cabin_baggage": string|null       // CABIN/carry-on baggage e.g. "7kg"
     }
   ]
 }
@@ -141,6 +142,7 @@ PROMPT;
                 'depart_at' => $this->cleanDateTime($str($s['depart_at'] ?? null)),
                 'arrive_at' => $this->cleanDateTime($str($s['arrive_at'] ?? null)),
                 'baggage' => $str($s['baggage'] ?? null) ?? '',
+                'cabin_baggage' => $str($s['cabin_baggage'] ?? null) ?? '',
             ];
         }
 

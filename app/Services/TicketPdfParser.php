@@ -149,6 +149,7 @@ class TicketPdfParser
                 'depart_at' => $this->toLocal($depDate, $depTime),
                 'arrive_at' => $this->toLocal($arrDate, $arrTime),
                 'baggage' => $this->normBaggage($baggage),
+                'cabin_baggage' => '',
             ];
         }
 
@@ -171,14 +172,17 @@ class TicketPdfParser
         // Airline + flight number, e.g. "Economy ClassAir Astra | 2A - 445 | ATR 72".
         preg_match_all('/(?:Economy|Business|First|Premium)\s*Class\s*([A-Za-z][A-Za-z .\'\-]*?)\s*\|\s*([A-Z0-9]{2})\s*[-\s]\s*(\d{1,4})/u', $flat, $fm, PREG_SET_ORDER);
         $cabin = $this->match('/\b(Economy|Business|First|Premium)\s*Class/i', $flat) ?: 'Economy';
-        // Check-in baggage sits right after the e-ticket number in this layout,
-        // e.g. "ADULT<13-digit ticket>20KG7Kg" -> we want the 20 (check-in, "KG"),
-        // NOT the 7 (cabin, "Kg"). Greedy digit run backtracks to the 2 digits
-        // before "KG". Fall back to a standalone "NN KG" if that shape is absent.
-        $baggage = $this->normBaggage(
-            $this->match('/(?:ADULT|CHILD|INFANT)\d{10,}(\d{2})\s*KG(?!g)/i', $flat)
-            ?: $this->match('/(?<!\d)(\d{1,3})\s*KG(?!g)/i', $flat)
-        );
+        // Check-in + cabin baggage sit right after the e-ticket number in this
+        // layout, e.g. "ADULT<13-digit ticket>20KG7Kg" -> 20 = check-in ("KG"),
+        // 7 = cabin ("Kg"). Capture both in one match.
+        $checkin = '';
+        $cabinBag = '';
+        if (preg_match('/(?:ADULT|CHILD|INFANT)\d{10,}(\d{2})\s*KG\s*(\d{1,2})\s*Kg/', $flat, $bm)) {
+            $checkin = $this->normBaggage($bm[1]);
+            $cabinBag = $this->normBaggage($bm[2]);
+        } else {
+            $checkin = $this->normBaggage($this->match('/(?<!\d)(\d{1,3})\s*KG(?!g)/i', $flat));
+        }
 
         $segments = [];
         $pairs = intdiv(count($stops), 2);
@@ -198,7 +202,8 @@ class TicketPdfParser
                 'to_code' => strtoupper($arr[2]),
                 'depart_at' => $this->toLocal($dep[3], $dep[4]),
                 'arrive_at' => $this->toLocal($arr[3], $arr[4]),
-                'baggage' => $baggage,
+                'baggage' => $checkin,
+                'cabin_baggage' => $cabinBag,
             ];
         }
 
