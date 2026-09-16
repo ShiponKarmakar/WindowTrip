@@ -3,15 +3,16 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
-    profile: Object,
+    profile: { type: Object, default: () => ({}) },
 });
 
 const info = useForm({
-    name: props.profile.name,
-    email: props.profile.email,
+    name: props.profile.name || '',
+    email: props.profile.email || '',
+    phone: props.profile.phone || '',
 });
 
-const pwd = useForm({
+const pass = useForm({
     current_password: '',
     password: '',
     password_confirmation: '',
@@ -21,9 +22,9 @@ function saveInfo() {
     info.patch(route('admin.profile.update'), { preserveScroll: true });
 }
 function savePassword() {
-    pwd.put(route('admin.profile.password'), {
+    pass.put(route('admin.profile.password'), {
         preserveScroll: true,
-        onSuccess: () => pwd.reset(),
+        onSuccess: () => pass.reset(),
     });
 }
 </script>
@@ -33,73 +34,40 @@ function savePassword() {
     <AdminLayout>
         <template #title>My Profile</template>
 
-        <div class="mx-auto max-w-3xl space-y-6">
-            <!-- Identity card -->
-            <div class="flex items-center gap-4 rounded-2xl bg-brand-gradient p-6 text-white shadow-brand">
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl font-bold">
-                    {{ profile.name?.charAt(0) }}
-                </div>
-                <div>
-                    <h2 class="font-heading text-xl font-bold">{{ profile.name }}</h2>
-                    <p class="text-sm text-white/80">{{ profile.email }}</p>
-                    <div class="mt-1 flex flex-wrap gap-1">
-                        <span v-for="r in profile.roles" :key="r" class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium capitalize">{{ r }}</span>
-                        <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs">Joined {{ profile.joined }}</span>
-                    </div>
-                </div>
-            </div>
-
+        <div class="max-w-2xl space-y-6">
             <!-- Profile info -->
-            <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <form @submit.prevent="saveInfo" class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <h3 class="font-heading font-semibold text-brand-ink">Profile information</h3>
-                <p class="mt-1 text-sm text-slate-500">Update your name and email address.</p>
-                <form @submit.prevent="saveInfo" class="mt-5 space-y-4">
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
-                            <input v-model="info.name" type="text" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
-                            <p v-if="info.errors.name" class="mt-1 text-xs text-red-500">{{ info.errors.name }}</p>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-                            <input v-model="info.email" type="email" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
-                            <p v-if="info.errors.email" class="mt-1 text-xs text-red-500">{{ info.errors.email }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button type="submit" :disabled="info.processing" class="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-brand hover:opacity-90 disabled:opacity-50">Save changes</button>
-                        <span v-if="info.recentlySuccessful" class="text-sm text-emerald-600">Saved ✓</span>
-                    </div>
-                </form>
-            </div>
+                <p class="mt-1 text-sm text-slate-500">Update your name and contact details.</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div><label class="lbl">Full name</label><input v-model="info.name" class="inp" /><p v-if="info.errors.name" class="err">{{ info.errors.name }}</p></div>
+                    <div><label class="lbl">Email</label><input v-model="info.email" type="email" class="inp" /><p v-if="info.errors.email" class="err">{{ info.errors.email }}</p></div>
+                    <div><label class="lbl">Phone <span class="text-slate-400">(optional)</span></label><input v-model="info.phone" class="inp" /><p v-if="info.errors.phone" class="err">{{ info.errors.phone }}</p></div>
+                </div>
+                <div class="mt-5">
+                    <button type="submit" :disabled="info.processing" class="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-brand hover:opacity-90 disabled:opacity-50">Save changes</button>
+                </div>
+            </form>
 
-            <!-- Password -->
-            <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                <h3 class="font-heading font-semibold text-brand-ink">Update password</h3>
-                <p class="mt-1 text-sm text-slate-500">Use a long, random password to stay secure.</p>
-                <form @submit.prevent="savePassword" class="mt-5 space-y-4">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700">Current password</label>
-                        <input v-model="pwd.current_password" type="password" class="w-full max-w-sm rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
-                        <p v-if="pwd.errors.current_password" class="mt-1 text-xs text-red-500">{{ pwd.errors.current_password }}</p>
-                    </div>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700">New password</label>
-                            <input v-model="pwd.password" type="password" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
-                            <p v-if="pwd.errors.password" class="mt-1 text-xs text-red-500">{{ pwd.errors.password }}</p>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700">Confirm new password</label>
-                            <input v-model="pwd.password_confirmation" type="password" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button type="submit" :disabled="pwd.processing" class="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-brand hover:opacity-90 disabled:opacity-50">Update password</button>
-                        <span v-if="pwd.recentlySuccessful" class="text-sm text-emerald-600">Updated ✓</span>
-                    </div>
-                </form>
-            </div>
+            <!-- Change password -->
+            <form @submit.prevent="savePassword" class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                <h3 class="font-heading font-semibold text-brand-ink">Change password</h3>
+                <p class="mt-1 text-sm text-slate-500">Use a long, unique password to keep your account secure.</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div class="sm:col-span-2"><label class="lbl">Current password</label><input v-model="pass.current_password" type="password" class="inp" /><p v-if="pass.errors.current_password" class="err">{{ pass.errors.current_password }}</p></div>
+                    <div><label class="lbl">New password</label><input v-model="pass.password" type="password" class="inp" /><p v-if="pass.errors.password" class="err">{{ pass.errors.password }}</p></div>
+                    <div><label class="lbl">Confirm new password</label><input v-model="pass.password_confirmation" type="password" class="inp" /></div>
+                </div>
+                <div class="mt-5">
+                    <button type="submit" :disabled="pass.processing" class="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-brand hover:opacity-90 disabled:opacity-50">Update password</button>
+                </div>
+            </form>
         </div>
     </AdminLayout>
 </template>
+
+<style scoped>
+.lbl { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+.inp { @apply w-full rounded-xl border-slate-200 text-sm focus:border-brand-purple focus:ring-brand-purple; }
+.err { @apply mt-1 text-xs text-red-500; }
+</style>

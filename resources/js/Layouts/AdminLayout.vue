@@ -118,7 +118,7 @@ function closeMenu() {
                 </h1>
 
                 <!-- Global search -->
-                <div class="relative w-full max-w-md flex-1" v-click-outside="closeSearch">
+                <div class="relative w-full max-w-sm" v-click-outside="closeSearch">
                     <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
                     <input
                         ref="searchInput"
@@ -144,7 +144,7 @@ function closeMenu() {
                     </div>
                 </div>
 
-                <div class="flex shrink-0 items-center gap-2.5">
+                <div class="ml-auto flex shrink-0 items-center gap-2.5">
                     <!-- Notifications -->
                     <button type="button" title="Notifications" class="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 transition hover:bg-slate-50 hover:text-brand-purple">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0"/></svg>

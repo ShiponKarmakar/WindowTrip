@@ -179,10 +179,10 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         ->parameters(['visas' => 'visa'])->except(['show']);
     Route::resource('packages', PackageController::class)->except(['show']);
 
-    // Profile & settings
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    // Profile & settings (admin guard)
+    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile');
+    Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\Admin\ProfileController::class, 'password'])->name('profile.password');
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
     Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-email', [SettingsController::class, 'test'])->name('settings.test');
