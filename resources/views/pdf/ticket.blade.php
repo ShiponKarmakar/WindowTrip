@@ -77,14 +77,11 @@
                 <div style="font-weight:bold">{{ $ticket->client_name }}</div>
                 <div class="muted">{{ $ticket->client_email }}@if($ticket->client_phone) · {{ $ticket->client_phone }}@endif</div>
                 @if($ticket->airline)
-                    <div style="margin-top:8px">
+                    <div style="margin-top:10px">
                         <table cellpadding="0" cellspacing="0"><tr>
-                            <td style="background:{{ $primary }}; border-radius:6px; padding:5px 8px;">
-                                <span style="color:#fff; font-size:13px; font-weight:bold;">&#9992;</span>
-                            </td>
-                            <td style="padding-left:8px;">
-                                <div style="font-size:9px; letter-spacing:1px; color:#9ca3af; text-transform:uppercase;">Airline</div>
-                                <div style="font-size:13px; font-weight:bold; color:#12263b;">{{ $ticket->airline }}</div>
+                            <td style="background:#eef7fb; border:1px solid #d6ebf5; border-radius:4px; padding:5px 12px;">
+                                <span style="color:{{ $primary }}; font-size:12px;">&#9992;</span>
+                                <span style="color:#12263b; font-size:12px; font-weight:bold; padding-left:6px;">{{ $ticket->airline }}</span>
                             </td>
                         </tr></table>
                     </div>
