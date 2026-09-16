@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FlightTicketController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\PackageController;
@@ -103,6 +104,10 @@ Route::middleware('auth')->group(function () {
     // Customer invoices
     Route::get('/invoices', [\App\Http\Controllers\PortalInvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{invoice}/pdf', [\App\Http\Controllers\PortalInvoiceController::class, 'pdf'])->name('invoices.pdf');
+
+    // Customer e-tickets (named my-tickets.* to avoid clashing with the public air-tickets page)
+    Route::get('/my-tickets', [\App\Http\Controllers\PortalTicketController::class, 'index'])->name('my-tickets.index');
+    Route::get('/my-tickets/{flightTicket}/pdf', [\App\Http\Controllers\PortalTicketController::class, 'pdf'])->name('my-tickets.pdf');
 });
 
 /*
@@ -143,6 +148,19 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
+    // Flight tickets (order: literal /create before /{flightTicket})
+    Route::get('/tickets', [FlightTicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/create', [FlightTicketController::class, 'create'])->name('tickets.create');
+    Route::post('/tickets', [FlightTicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/{flightTicket}/edit', [FlightTicketController::class, 'edit'])->name('tickets.edit');
+    Route::get('/tickets/{flightTicket}/pdf', [FlightTicketController::class, 'pdf'])->name('tickets.pdf');
+    Route::get('/tickets/{flightTicket}/source', [FlightTicketController::class, 'source'])->name('tickets.source');
+    Route::patch('/tickets/{flightTicket}/status', [FlightTicketController::class, 'status'])->name('tickets.status');
+    Route::post('/tickets/{flightTicket}/email', [FlightTicketController::class, 'email'])->name('tickets.email');
+    Route::match(['put', 'patch'], '/tickets/{flightTicket}', [FlightTicketController::class, 'update'])->name('tickets.update');
+    Route::get('/tickets/{flightTicket}', [FlightTicketController::class, 'show'])->name('tickets.show');
+    Route::delete('/tickets/{flightTicket}', [FlightTicketController::class, 'destroy'])->name('tickets.destroy');
 
     // Catalog management
     Route::resource('visas', VisaCountryController::class)
