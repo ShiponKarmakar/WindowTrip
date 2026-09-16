@@ -185,6 +185,10 @@ class FlightTicketController extends Controller
     /** Email the branded e-ticket (with PDF) to the client. */
     public function email(FlightTicket $flightTicket)
     {
+        if (! $flightTicket->client_email) {
+            return back()->with('error', 'This ticket has no client email — add one first to send it.');
+        }
+
         try {
             Notification::route('mail', $flightTicket->client_email)
                 ->notify(new FlightTicketIssued($flightTicket));
@@ -224,7 +228,7 @@ class FlightTicketController extends Controller
             'visa_application_id' => ['nullable', 'exists:visa_applications,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'client_name' => ['required', 'string', 'max:120'],
-            'client_email' => ['required', 'email', 'max:120'],
+            'client_email' => ['nullable', 'email', 'max:120'],
             'client_phone' => ['nullable', 'string', 'max:40'],
             'pnr' => ['required', 'string', 'max:20'],
             'booking_ref' => ['nullable', 'string', 'max:40'],

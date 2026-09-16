@@ -63,7 +63,14 @@ function applyParsed(d) {
     if (d.airline) form.airline = d.airline;
     if (d.passengers?.length) {
         form.passengers = d.passengers.map((p) => ({ name: p.name || '', type: (p.type || 'adult').toLowerCase(), ticket_number: p.ticket_number || '', seat: p.seat || '' }));
+        // Seed the client (booking contact) name from the primary passenger,
+        // unless a client is already selected or a name was typed.
+        if (!form.user_id && !form.client_name && d.passengers[0]?.name) {
+            form.client_name = d.passengers[0].name;
+        }
     }
+    if (d.client_email && !form.user_id && !form.client_email) form.client_email = d.client_email;
+    if (d.client_phone && !form.user_id && !form.client_phone) form.client_phone = d.client_phone;
     if (d.segments?.length) {
         form.segments = d.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || 'Economy', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '' }));
     }
@@ -144,7 +151,7 @@ function submit() {
                     <div><label class="lbl">Airline</label><input v-model="form.airline" class="inp" placeholder="e.g. Emirates" /></div>
                     <div><label class="lbl">Ticket number</label><input v-model="form.number" class="inp" /><p v-if="form.errors.number" class="err">{{ form.errors.number }}</p></div>
                     <div><label class="lbl">Client name</label><input v-model="form.client_name" class="inp" /><p v-if="form.errors.client_name" class="err">{{ form.errors.client_name }}</p></div>
-                    <div><label class="lbl">Client email</label><input v-model="form.client_email" type="email" class="inp" /><p v-if="form.errors.client_email" class="err">{{ form.errors.client_email }}</p></div>
+                    <div><label class="lbl">Client email <span class="text-slate-400">(optional)</span></label><input v-model="form.client_email" type="email" class="inp" /><p v-if="form.errors.client_email" class="err">{{ form.errors.client_email }}</p></div>
                     <div><label class="lbl">Client phone</label><input v-model="form.client_phone" class="inp" /></div>
                     <div><label class="lbl">Issue date</label><input v-model="form.issue_date" type="date" class="inp" /><p v-if="form.errors.issue_date" class="err">{{ form.errors.issue_date }}</p></div>
                     <div>
