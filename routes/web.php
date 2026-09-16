@@ -1,10 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\ApplicationController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\VisaApplicationController;
 use App\Http\Controllers\VisaController;
+use App\Models\Package;
+use App\Models\VisaApplication;
+use App\Models\VisaCountry;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,11 +25,11 @@ use Inertia\Inertia;
 */
 Route::get('/', function () {
     return Inertia::render('Public/Home', [
-        'visas' => collect(\App\Models\VisaCountry::publicConfig())->map(fn ($v, $slug) => [
+        'visas' => collect(VisaCountry::publicConfig())->map(fn ($v, $slug) => [
             'slug' => $slug, 'name' => $v['name'], 'flag' => $v['flag'],
             'processing' => $v['processing'], 'fee_from' => $v['fee_from'],
         ])->values(),
-        'packages' => \App\Models\Package::activeOrdered()->take(3)->get()
+        'packages' => Package::activeOrdered()->take(3)->get()
             ->map(fn ($p) => $p->only(['slug', 'title', 'nights', 'price', 'tag', 'color'])),
     ]);
 })->name('home');
@@ -68,7 +78,7 @@ Route::get('/dashboard', function () {
     // Only the signed-in user's own applications (match by account, never by
     // unverified email — otherwise anyone could register with someone's email
     // and see their applications).
-    $applications = \App\Models\VisaApplication::query()
+    $applications = VisaApplication::query()
         ->where('user_id', $user->id)
         ->latest()
         ->get()
@@ -97,37 +107,37 @@ Route::middleware('auth')->group(function () {
 */
 Route::prefix('admin')->name('admin.')->group(function () {
     // Staff login (admin guard) — accessible without the customer session
-    Route::get('/login', [\App\Http\Controllers\Admin\AuthController::class, 'create'])->name('login');
-    Route::post('/login', [\App\Http\Controllers\Admin\AuthController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
 });
 
 Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-    Route::post('/logout', [\App\Http\Controllers\Admin\AuthController::class, 'destroy'])->name('logout');
-    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
-    Route::get('/applications/{application}/edit', [\App\Http\Controllers\Admin\ApplicationController::class, 'edit'])->name('applications.edit');
-    Route::patch('/applications/{application}', [\App\Http\Controllers\Admin\ApplicationController::class, 'update'])->name('applications.update');
-    Route::get('/applications/{application}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('applications.show');
-    Route::patch('/applications/{application}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.status');
-    Route::get('/applications/{application}/email', [\App\Http\Controllers\Admin\ApplicationController::class, 'compose'])->name('applications.compose');
-    Route::post('/applications/{application}/message', [\App\Http\Controllers\Admin\ApplicationController::class, 'message'])->name('applications.message');
-    Route::get('/applications/{application}/document/{type}', [\App\Http\Controllers\Admin\ApplicationController::class, 'document'])->name('applications.document');
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
+    Route::patch('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
+    Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+    Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+    Route::get('/applications/{application}/email', [ApplicationController::class, 'compose'])->name('applications.compose');
+    Route::post('/applications/{application}/message', [ApplicationController::class, 'message'])->name('applications.message');
+    Route::get('/applications/{application}/document/{type}', [ApplicationController::class, 'document'])->name('applications.document');
 
-    Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
-    Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Admin\LeadController::class, 'updateStatus'])->name('leads.status');
+    Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+    Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
 
     // Catalog management
-    Route::resource('visas', \App\Http\Controllers\Admin\VisaCountryController::class)
+    Route::resource('visas', VisaCountryController::class)
         ->parameters(['visas' => 'visa'])->except(['show']);
-    Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class)->except(['show']);
+    Route::resource('packages', PackageController::class)->except(['show']);
 
     // Profile & settings
-    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile');
-    Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password');
-    Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'edit'])->name('settings');
-    Route::patch('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
-    Route::post('/settings/test-email', [\App\Http\Controllers\Admin\SettingsController::class, 'test'])->name('settings.test');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
+    Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/test-email', [SettingsController::class, 'test'])->name('settings.test');
 });
 
 require __DIR__.'/auth.php';
