@@ -1,12 +1,38 @@
 <script setup>
 import { Link, usePage, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { debounce } from 'lodash';
 
 const page = usePage();
 const user = computed(() => page.props.auth.admin);
 const flash = computed(() => page.props.flash?.success);
 const showFlash = ref(true);
 const menuOpen = ref(false);
+
+// Global search
+const search = ref('');
+const results = ref([]);
+const searchOpen = ref(false);
+const searching = ref(false);
+
+const runSearch = debounce(async (q) => {
+    if (!q || q.length < 2) { results.value = []; searchOpen.value = false; return; }
+    searching.value = true;
+    searchOpen.value = true;
+    try {
+        const { data } = await window.axios.get(route('admin.search'), { params: { q } });
+        results.value = data.groups || [];
+    } catch (e) {
+        results.value = [];
+    } finally {
+        searching.value = false;
+    }
+}, 250);
+
+watch(search, (v) => runSearch(v));
+
+function closeSearch() { searchOpen.value = false; }
+function gotoResult() { searchOpen.value = false; search.value = ''; results.value = []; }
 
 // Local directive: close on outside click.
 const vClickOutside = {
@@ -66,31 +92,41 @@ function closeMenu() {
                     {{ item.label }}
                 </Link>
             </nav>
-            <div class="border-t border-slate-100 p-4">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
-                        {{ user?.name?.charAt(0) }}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="truncate text-sm font-medium text-brand-ink">{{ user?.name }}</div>
-                        <button @click="logout" class="text-xs text-slate-400 hover:text-brand-purple">Sign out</button>
-                    </div>
-                </div>
-            </div>
         </aside>
 
         <!-- Main -->
         <div class="lg:pl-64">
-            <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-5 backdrop-blur">
-                <h1 class="font-heading text-lg font-semibold text-brand-ink">
+            <header class="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/90 px-5 backdrop-blur">
+                <h1 class="hidden shrink-0 font-heading text-lg font-semibold text-brand-ink md:block">
                     <slot name="title">Admin</slot>
                 </h1>
-                <div class="flex items-center gap-3">
-                    <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-brand-purple">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-9 9M10 5H5v14h14v-5"/></svg>
-                        View site
-                    </a>
 
+                <!-- Global search -->
+                <div class="relative w-full max-w-md flex-1" v-click-outside="closeSearch">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+                    <input
+                        v-model="search"
+                        @focus="search.length >= 2 && (searchOpen = true)"
+                        type="text"
+                        placeholder="Search tickets, invoices, clients…"
+                        class="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-brand-ink placeholder:text-slate-400 focus:border-brand-purple focus:bg-white focus:ring-brand-purple"
+                    />
+                    <div v-if="searchOpen" class="absolute left-0 right-0 z-40 mt-2 max-h-[70vh] overflow-auto rounded-2xl border border-slate-100 bg-white py-2 shadow-brand">
+                        <div v-if="searching" class="px-4 py-3 text-sm text-slate-400">Searching…</div>
+                        <template v-else-if="results.length">
+                            <div v-for="g in results" :key="g.label">
+                                <p class="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ g.label }}</p>
+                                <Link v-for="(it, idx) in g.items" :key="idx" :href="it.url" @click="gotoResult" class="block px-4 py-2 hover:bg-slate-50">
+                                    <div class="text-sm font-medium text-brand-ink">{{ it.title }}</div>
+                                    <div class="truncate text-xs text-slate-400">{{ it.sub }}</div>
+                                </Link>
+                            </div>
+                        </template>
+                        <div v-else class="px-4 py-3 text-sm text-slate-400">No matches for “{{ search }}”.</div>
+                    </div>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-3">
                     <!-- Profile dropdown -->
                     <div class="relative" v-click-outside="closeMenu">
                         <button @click="menuOpen = !menuOpen" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-slate-100">

@@ -125,6 +125,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
     Route::patch('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
