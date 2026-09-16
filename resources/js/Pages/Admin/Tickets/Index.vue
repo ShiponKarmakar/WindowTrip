@@ -62,20 +62,19 @@ const badge = (s) => ({
                     <tr>
                         <th class="px-5 py-3">Ticket</th><th class="px-5 py-3">PNR</th>
                         <th class="px-5 py-3">Client</th><th class="px-5 py-3">Route</th>
-                        <th class="px-5 py-3">Status</th><th class="px-5 py-3">Issued</th><th class="px-5 py-3"></th>
+                        <th class="px-5 py-3">Status</th><th class="px-5 py-3">Issued</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     <tr v-for="t in tickets.data" :key="t.id" class="hover:bg-slate-50">
-                        <td class="px-5 py-3 font-mono text-xs text-brand-purple">{{ t.number }}</td>
+                        <td class="px-5 py-3"><Link :href="route('admin.tickets.show', t.id)" class="font-mono text-xs font-semibold text-brand-purple hover:underline">{{ t.number }}</Link></td>
                         <td class="px-5 py-3 font-mono text-xs font-semibold text-brand-ink">{{ t.pnr }}</td>
                         <td class="px-5 py-3 font-medium text-brand-ink">{{ t.client_name }}</td>
                         <td class="px-5 py-3 text-slate-600">{{ t.route || '—' }}</td>
                         <td class="px-5 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-medium capitalize" :class="badge(t.status)">{{ t.status }}</span></td>
                         <td class="px-5 py-3 text-slate-500">{{ t.issue_date }}</td>
-                        <td class="px-5 py-3 text-right"><Link :href="route('admin.tickets.show', t.id)" class="text-sm font-semibold text-brand-purple hover:underline">Open →</Link></td>
                     </tr>
-                    <tr v-if="!tickets.data.length"><td colspan="7" class="px-5 py-12 text-center text-slate-400">No tickets yet.</td></tr>
+                    <tr v-if="!tickets.data.length"><td colspan="6" class="px-5 py-12 text-center text-slate-400">No tickets yet.</td></tr>
                 </tbody>
             </table>
         </div>
