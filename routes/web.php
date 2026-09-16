@@ -162,6 +162,7 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     // Flight tickets (order: literal /create before /{flightTicket})
     Route::get('/tickets', [FlightTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/create', [FlightTicketController::class, 'create'])->name('tickets.create');
+    Route::post('/tickets/parse', [FlightTicketController::class, 'parse'])->name('tickets.parse');
     Route::post('/tickets', [FlightTicketController::class, 'store'])->name('tickets.store');
     Route::get('/tickets/{flightTicket}/edit', [FlightTicketController::class, 'edit'])->name('tickets.edit');
     Route::get('/tickets/{flightTicket}/pdf', [FlightTicketController::class, 'pdf'])->name('tickets.pdf');

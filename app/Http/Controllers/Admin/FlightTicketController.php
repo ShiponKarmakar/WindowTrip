@@ -7,6 +7,7 @@ use App\Models\FlightTicket;
 use App\Models\User;
 use App\Models\VisaApplication;
 use App\Notifications\FlightTicketIssued;
+use App\Services\TicketPdfParser;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -86,6 +87,16 @@ class FlightTicketController extends Controller
             'statuses' => self::STATUSES,
             'clients' => $this->clientOptions(),
         ]);
+    }
+
+    /** Best-effort extraction of ticket fields from an uploaded text-based PDF. */
+    public function parse(Request $request, TicketPdfParser $parser)
+    {
+        $request->validate([
+            'source_file' => ['required', 'file', 'mimes:pdf', 'max:8192'],
+        ]);
+
+        return response()->json($parser->parse($request->file('source_file')->getRealPath()));
     }
 
     /** Lightweight client list for the picker. */

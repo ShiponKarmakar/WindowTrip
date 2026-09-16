@@ -2,6 +2,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ClientPicker from '@/Components/ClientPicker.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({
     ticket: { type: Object, default: null },
@@ -48,7 +49,50 @@ function onClientSelect(client) {
 }
 function addPassenger() { form.passengers.push({ name: '', type: 'adult', ticket_number: '', seat: '' }); }
 function addSegment() { form.segments.push({ airline: '', flight_number: '', cabin: 'Economy', from_code: '', from_city: '', to_code: '', to_city: '', depart_at: '', arrive_at: '', baggage: '' }); }
-function onFile(e) { form.source_file = e.target.files[0] || null; }
+const parsing = ref(false);
+const parseMsg = ref('');
+const parseOk = ref(false);
+function onFile(e) {
+    form.source_file = e.target.files[0] || null;
+    parseMsg.value = '';
+}
+
+function applyParsed(d) {
+    if (d.pnr) form.pnr = d.pnr;
+    if (d.booking_ref) form.booking_ref = d.booking_ref;
+    if (d.airline) form.airline = d.airline;
+    if (d.passengers?.length) {
+        form.passengers = d.passengers.map((p) => ({ name: p.name || '', type: (p.type || 'adult').toLowerCase(), ticket_number: p.ticket_number || '', seat: p.seat || '' }));
+    }
+    if (d.segments?.length) {
+        form.segments = d.segments.map((s) => ({ airline: s.airline || '', flight_number: s.flight_number || '', cabin: s.cabin || 'Economy', from_code: s.from_code || '', from_city: s.from_city || '', to_code: s.to_code || '', to_city: s.to_city || '', depart_at: s.depart_at || '', arrive_at: s.arrive_at || '', baggage: s.baggage || '' }));
+    }
+}
+
+async function autofill() {
+    if (!form.source_file) return;
+    parsing.value = true;
+    parseMsg.value = '';
+    parseOk.value = false;
+    try {
+        const fd = new FormData();
+        fd.append('source_file', form.source_file);
+        const { data } = await window.axios.post(route('admin.tickets.parse'), fd);
+        if (!data.ok) {
+            parseMsg.value = data.reason === 'no_text'
+                ? 'This looks like a scanned/image PDF — there’s no text to read. Please enter the details manually.'
+                : 'Couldn’t recognise this ticket’s layout. Please enter the details manually.';
+            return;
+        }
+        applyParsed(data.data);
+        parseOk.value = true;
+        parseMsg.value = 'Fields auto-filled from the PDF — please review everything before saving.';
+    } catch (e) {
+        parseMsg.value = 'Could not read this file. Make sure it’s a text-based PDF, or enter the details manually.';
+    } finally {
+        parsing.value = false;
+    }
+}
 
 function submit() {
     const opts = { preserveScroll: true, forceFormData: true };
@@ -71,8 +115,19 @@ function submit() {
             <!-- Upload original -->
             <div class="rounded-2xl border border-dashed border-brand-purple/30 bg-brand-50/40 p-6">
                 <h3 class="font-heading font-semibold text-brand-ink">Original ticket <span class="text-slate-500">(optional)</span></h3>
-                <p class="mt-1 text-sm text-slate-500">Upload the airline/GDS ticket (PDF or image). We store it alongside this record — the branded WindowTrip e-ticket is generated from the fields below.</p>
+                <p class="mt-1 text-sm text-slate-500">Upload the airline/GDS ticket (PDF or image). We store it alongside this record. For a text-based PDF, use <strong>Auto-fill from PDF</strong> to read the PNR, flights and passengers into the fields below — then review. The branded WindowTrip e-ticket is generated from those fields.</p>
                 <input type="file" accept=".pdf,.png,.jpg,.jpeg" @change="onFile" class="mt-3 block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-brand-gradient file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+
+                <div v-if="form.source_file" class="mt-3 flex flex-wrap items-center gap-3">
+                    <button type="button" @click="autofill" :disabled="parsing"
+                        class="inline-flex items-center gap-2 rounded-full bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">
+                        <svg v-if="parsing" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"/></svg>
+                        <span>{{ parsing ? 'Reading PDF…' : '✨ Auto-fill from PDF' }}</span>
+                    </button>
+                    <span class="text-xs text-slate-400">Text-based PDFs only. Always review the result.</span>
+                </div>
+                <p v-if="parseMsg" class="mt-2 rounded-lg px-3 py-2 text-xs" :class="parseOk ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'">{{ parseMsg }}</p>
+
                 <p v-if="isEdit && t.source_file_name" class="mt-2 text-xs text-slate-500">Current file: <span class="font-medium">{{ t.source_file_name }}</span> — uploading a new one replaces it.</p>
                 <p v-if="form.errors.source_file" class="err">{{ form.errors.source_file }}</p>
             </div>
