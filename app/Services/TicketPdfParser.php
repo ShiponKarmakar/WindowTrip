@@ -48,6 +48,12 @@ class TicketPdfParser
         return ['ok' => $found, 'reason' => $found ? null : 'unrecognised', 'data' => $data];
     }
 
+    /** Public accessor for the raw extracted text (used by the AI fallback). */
+    public function text(string $path): string
+    {
+        return $this->extractText($path);
+    }
+
     private function extractText(string $path): string
     {
         try {
@@ -165,9 +171,14 @@ class TicketPdfParser
         // Airline + flight number, e.g. "Economy ClassAir Astra | 2A - 445 | ATR 72".
         preg_match_all('/(?:Economy|Business|First|Premium)\s*Class\s*([A-Za-z][A-Za-z .\'\-]*?)\s*\|\s*([A-Z0-9]{2})\s*[-\s]\s*(\d{1,4})/u', $flat, $fm, PREG_SET_ORDER);
         $cabin = $this->match('/\b(Economy|Business|First|Premium)\s*Class/i', $flat) ?: 'Economy';
-        // Baggage: 1-2 digits before KG, not part of a longer digit run (avoids
-        // grabbing digits off a jammed e-ticket number).
-        $baggage = $this->normBaggage($this->match('/(?<!\d)(\d{1,2})\s*KG\b/i', $flat));
+        // Check-in baggage sits right after the e-ticket number in this layout,
+        // e.g. "ADULT<13-digit ticket>20KG7Kg" -> we want the 20 (check-in, "KG"),
+        // NOT the 7 (cabin, "Kg"). Greedy digit run backtracks to the 2 digits
+        // before "KG". Fall back to a standalone "NN KG" if that shape is absent.
+        $baggage = $this->normBaggage(
+            $this->match('/(?:ADULT|CHILD|INFANT)\d{10,}(\d{2})\s*KG(?!g)/i', $flat)
+            ?: $this->match('/(?<!\d)(\d{1,3})\s*KG(?!g)/i', $flat)
+        );
 
         $segments = [];
         $pairs = intdiv(count($stops), 2);
@@ -234,8 +245,13 @@ class TicketPdfParser
         if (! $kg) {
             return '';
         }
+        $kg = trim($kg);
+        // Trim only decimal zeros ("30.0" -> "30"); never integer zeros ("20" -> "20").
+        if (str_contains($kg, '.')) {
+            $kg = rtrim(rtrim($kg, '0'), '.');
+        }
 
-        return rtrim(rtrim($kg, '0'), '.').'kg';
+        return $kg.'kg';
     }
 
     private function toLocal(?string $date, ?string $time): string

@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'openai' => [
+        // Used to auto-extract fields from uploaded ticket PDFs the pattern
+        // parser can't recognise. Leave the key empty to disable the AI path.
+        'key' => env('OPENAI_API_KEY'),
+        'ticket_model' => env('OPENAI_TICKET_MODEL', 'gpt-4o-mini'),
+    ],
+
 ];

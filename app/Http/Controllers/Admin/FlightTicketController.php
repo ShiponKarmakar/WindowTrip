@@ -7,6 +7,7 @@ use App\Models\FlightTicket;
 use App\Models\User;
 use App\Models\VisaApplication;
 use App\Notifications\FlightTicketIssued;
+use App\Services\AiTicketExtractor;
 use App\Services\TicketPdfParser;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -89,14 +90,33 @@ class FlightTicketController extends Controller
         ]);
     }
 
-    /** Best-effort extraction of ticket fields from an uploaded text-based PDF. */
-    public function parse(Request $request, TicketPdfParser $parser)
+    /**
+     * Best-effort extraction of ticket fields from an uploaded text-based PDF.
+     * Pattern parser first (free, for known layouts); if it isn't confident and
+     * an OpenAI key is configured, fall back to AI extraction for any layout.
+     */
+    public function parse(Request $request, TicketPdfParser $parser, AiTicketExtractor $ai)
     {
         $request->validate([
             'source_file' => ['required', 'file', 'mimes:pdf', 'max:8192'],
         ]);
 
-        return response()->json($parser->parse($request->file('source_file')->getRealPath()));
+        $path = $request->file('source_file')->getRealPath();
+        $result = $parser->parse($path);
+        $data = $result['data'] ?? [];
+
+        $confident = ! empty($data['pnr']) && ! empty($data['segments']) && ! empty($data['passengers']);
+
+        if (! $confident && $ai->enabled()) {
+            $aiData = $ai->extract($parser->text($path));
+            if (! empty($aiData) && (! empty($aiData['pnr']) || ! empty($aiData['segments']))) {
+                return response()->json(['ok' => true, 'reason' => null, 'source' => 'ai', 'data' => $aiData]);
+            }
+        }
+
+        $result['source'] = 'pattern';
+
+        return response()->json($result);
     }
 
     /** Lightweight client list for the picker. */

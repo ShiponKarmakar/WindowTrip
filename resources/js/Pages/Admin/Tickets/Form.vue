@@ -93,7 +93,8 @@ async function autofill() {
         }
         applyParsed(data.data);
         parseOk.value = true;
-        parseMsg.value = 'Fields auto-filled from the PDF — please review everything before saving.';
+        parseMsg.value = (data.source === 'ai' ? 'Fields auto-filled using AI' : 'Fields auto-filled from the PDF')
+            + ' — please review everything before saving.';
     } catch (e) {
         parseMsg.value = 'Could not read this file. Make sure it’s a text-based PDF, or enter the details manually.';
     } finally {
