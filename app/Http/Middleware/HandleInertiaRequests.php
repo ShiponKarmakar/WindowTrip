@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
                 // Admin guard runs independently of the customer (web) session.
                 'admin' => Auth::guard('admin')->user(),
                 'isAdmin' => (bool) Auth::guard('admin')->user()?->hasAnyRole(['admin', 'agent']),
+                'adminRole' => Auth::guard('admin')->user()?->getRoleNames()->first(),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
