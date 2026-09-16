@@ -1,9 +1,10 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({ invoice: Object, statuses: Array });
-const inv = props.invoice;
+const inv = computed(() => props.invoice);
 
 const money = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const badge = (s) => ({
@@ -19,19 +20,19 @@ const pay = useForm({
     note: '',
 });
 function recordPayment() {
-    pay.post(route('admin.invoices.payment', inv.id), { preserveScroll: true, onSuccess: () => pay.reset('note') });
+    pay.post(route('admin.invoices.payment', inv.value.id), { preserveScroll: true, onSuccess: () => pay.reset('note') });
 }
 function setStatus(status) {
-    router.patch(route('admin.invoices.status', inv.id), { status }, { preserveScroll: true });
+    router.patch(route('admin.invoices.status', inv.value.id), { status }, { preserveScroll: true });
 }
 function emailInvoice() {
-    if (confirm(`Email invoice ${inv.number} to ${inv.client_email}?`)) {
-        router.post(route('admin.invoices.email', inv.id), {}, { preserveScroll: true });
+    if (confirm(`Email invoice ${inv.value.number} to ${inv.value.client_email}?`)) {
+        router.post(route('admin.invoices.email', inv.value.id), {}, { preserveScroll: true });
     }
 }
 function remove() {
-    if (confirm(`Delete invoice ${inv.number}? This cannot be undone.`)) {
-        router.delete(route('admin.invoices.destroy', inv.id));
+    if (confirm(`Delete invoice ${inv.value.number}? This cannot be undone.`)) {
+        router.delete(route('admin.invoices.destroy', inv.value.id));
     }
 }
 </script>

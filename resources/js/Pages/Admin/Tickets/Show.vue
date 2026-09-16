@@ -1,9 +1,10 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({ ticket: Object, statuses: Array });
-const t = props.ticket;
+const t = computed(() => props.ticket);
 
 const badge = (s) => ({
     draft: 'bg-slate-100 text-slate-500', issued: 'bg-emerald-50 text-emerald-600',
@@ -18,16 +19,16 @@ const fmt = (v) => {
 };
 
 function setStatus(status) {
-    router.patch(route('admin.tickets.status', t.id), { status }, { preserveScroll: true });
+    router.patch(route('admin.tickets.status', t.value.id), { status }, { preserveScroll: true });
 }
 function emailTicket() {
-    if (confirm(`Email e-ticket ${t.number} to ${t.client_email}?`)) {
-        router.post(route('admin.tickets.email', t.id), {}, { preserveScroll: true });
+    if (confirm(`Email e-ticket ${t.value.number} to ${t.value.client_email}?`)) {
+        router.post(route('admin.tickets.email', t.value.id), {}, { preserveScroll: true });
     }
 }
 function remove() {
-    if (confirm(`Delete ticket ${t.number}? This cannot be undone.`)) {
-        router.delete(route('admin.tickets.destroy', t.id));
+    if (confirm(`Delete ticket ${t.value.number}? This cannot be undone.`)) {
+        router.delete(route('admin.tickets.destroy', t.value.id));
     }
 }
 </script>
