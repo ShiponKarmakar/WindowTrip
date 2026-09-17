@@ -11,7 +11,7 @@
     if (! empty($ticket->pnr)) {
         try {
             $gen = new \Picqer\Barcode\BarcodeGeneratorPNG();
-            $barcode = base64_encode($gen->getBarcode(strtoupper($ticket->pnr), $gen::TYPE_CODE_128, 2, 44));
+            $barcode = base64_encode($gen->getBarcode(strtoupper($ticket->pnr), $gen::TYPE_CODE_128, 1, 30));
         } catch (\Throwable $e) {
             $barcode = null;
         }
@@ -107,8 +107,8 @@
                 @if($ticket->booking_ref)<div class="muted" style="margin-top:6px">Airline ref: {{ strtoupper($ticket->booking_ref) }}</div>@endif
                 @if($barcode)
                     <div style="margin-top:10px">
-                        <img src="data:image/png;base64,{{ $barcode }}" alt="PNR barcode" style="height:40px; width:auto" />
-                        <div style="font-family: DejaVu Sans Mono, monospace; font-size:9px; letter-spacing:2px; color:#6b7280; margin-top:2px">{{ strtoupper($ticket->pnr) }}</div>
+                        <img src="data:image/png;base64,{{ $barcode }}" alt="PNR barcode" style="height:26px; width:auto" />
+                        <div style="font-family: DejaVu Sans Mono, monospace; font-size:8px; letter-spacing:1.5px; color:#9ca3af; margin-top:1px">{{ strtoupper($ticket->pnr) }}</div>
                     </div>
                 @endif
             </td>
