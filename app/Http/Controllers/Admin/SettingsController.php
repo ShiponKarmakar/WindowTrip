@@ -29,6 +29,8 @@ class SettingsController extends Controller
         $data = $request->validate([
             'company_name' => ['required', 'string', 'max:100'],
             'tagline' => ['nullable', 'string', 'max:150'],
+            'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg,webp', 'max:2048'],
+            'icon' => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg,webp,ico', 'max:1024'],
             'support_email' => ['required', 'email', 'max:120'],
             'support_phone' => ['nullable', 'string', 'max:40'],
             'office_address' => ['nullable', 'string', 'max:200'],
@@ -52,6 +54,15 @@ class SettingsController extends Controller
         $password = $request->input('mail_password');
         unset($data['mail_password']);
 
+        // Handle brand uploads (stored in the web-accessible public/brand folder).
+        unset($data['logo'], $data['icon']);
+        if ($request->hasFile('logo')) {
+            Setting::set('brand_logo', $this->storeBrandFile($request->file('logo'), 'logo'));
+        }
+        if ($request->hasFile('icon')) {
+            Setting::set('brand_icon', $this->storeBrandFile($request->file('icon'), 'icon'));
+        }
+
         foreach ($data as $key => $value) {
             Setting::set($key, $value);
         }
@@ -61,6 +72,19 @@ class SettingsController extends Controller
         }
 
         return back()->with('success', 'Settings saved.');
+    }
+
+    /** Move an uploaded brand file into public/brand and return its relative path. */
+    private function storeBrandFile(\Illuminate\Http\UploadedFile $file, string $kind): string
+    {
+        $dir = public_path('brand');
+        if (! is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $name = $kind.'-custom-'.now()->format('YmdHis').'.'.strtolower($file->getClientOriginalExtension());
+        $file->move($dir, $name);
+
+        return 'brand/'.$name;
     }
 
     /** Send a test email using the current mail settings. */

@@ -13,6 +13,8 @@ class Setting extends Model
     public const DEFAULTS = [
         'company_name' => 'Window Trip',
         'tagline' => 'Your Complete Travel Partner',
+        'brand_logo' => '',   // path under public/, e.g. brand/logo-custom.png
+        'brand_icon' => '',   // path under public/, e.g. brand/icon-custom.png
         'support_email' => 'hello@windowtrip.test',
         'support_phone' => '+880 1700-000000',
         'office_address' => 'Dhaka, Bangladesh',
@@ -48,5 +50,33 @@ class Setting extends Model
     public static function allWithDefaults(): array
     {
         return array_merge(self::DEFAULTS, static::pluck('value', 'key')->toArray());
+    }
+
+    /** Public URL of the brand logo (uploaded one, else the bundled default). */
+    public static function logoUrl(): string
+    {
+        $p = self::get('brand_logo');
+
+        return $p ? '/'.ltrim($p, '/') : '/brand/logo-horizontal.svg';
+    }
+
+    /** Public URL of the brand icon / favicon. */
+    public static function iconUrl(): string
+    {
+        $p = self::get('brand_icon');
+
+        return $p ? '/'.ltrim($p, '/') : '/brand/icon.svg';
+    }
+
+    /** Filesystem path to a raster logo for the PDF (null if none/SVG). */
+    public static function logoPdfPath(): ?string
+    {
+        $p = self::get('brand_logo');
+        if ($p && preg_match('/\.(png|jpe?g)$/i', $p) && is_file(public_path($p))) {
+            return public_path($p);
+        }
+        $default = public_path('brand/logo-horizontal.png');
+
+        return is_file($default) ? $default : null;
     }
 }

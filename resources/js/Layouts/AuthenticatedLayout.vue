@@ -22,7 +22,7 @@ const showingNavigationDropdown = ref(false);
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
-                                    <img src="/brand/logo-horizontal.svg" alt="Window Trip" class="block h-8 w-auto" />
+                                    <img :src="$page.props.site?.logo || '/brand/logo-horizontal.svg'" alt="Window Trip" class="block h-8 w-auto" />
                                 </Link>
                             </div>
 

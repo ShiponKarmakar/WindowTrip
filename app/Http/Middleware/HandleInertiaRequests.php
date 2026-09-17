@@ -57,6 +57,8 @@ class HandleInertiaRequests extends Middleware
             'site' => fn () => [
                 'company' => \App\Models\Setting::get('company_name'),
                 'tagline' => \App\Models\Setting::get('tagline'),
+                'logo' => \App\Models\Setting::logoUrl(),
+                'icon' => \App\Models\Setting::iconUrl(),
                 'email' => \App\Models\Setting::get('support_email'),
                 'phone' => \App\Models\Setting::get('support_phone'),
                 'address' => \App\Models\Setting::get('office_address'),

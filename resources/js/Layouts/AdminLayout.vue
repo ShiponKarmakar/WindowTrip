@@ -97,7 +97,7 @@ function closeMenu() {
         <aside class="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
             <div class="flex h-16 items-center border-b border-slate-100 px-6">
                 <a href="/" class="flex items-center">
-                    <img src="/brand/logo-horizontal.svg" alt="Window Trip" class="h-8 w-auto" />
+                    <img :src="$page.props.site?.logo || '/brand/logo-horizontal.svg'" alt="Window Trip" class="h-8 w-auto" />
                 </a>
             </div>
             <nav class="flex-1 space-y-1 px-3 py-5">

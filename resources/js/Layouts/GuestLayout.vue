@@ -46,7 +46,7 @@ const highlights = [
         <div class="flex w-full flex-col justify-center px-6 py-10 sm:px-12 lg:w-1/2">
             <div class="mx-auto w-full max-w-md">
                 <a href="/" class="mb-8 inline-flex lg:hidden">
-                    <img src="/brand/logo-horizontal.svg" alt="Window Trip" class="h-10 w-auto" />
+                    <img :src="$page.props.site?.logo || '/brand/logo-horizontal.svg'" alt="Window Trip" class="h-10 w-auto" />
                 </a>
 
                 <div v-if="title">

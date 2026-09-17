@@ -26,10 +26,19 @@ const form = useForm({
     mail_encryption: props.settings.mail_encryption ?? 'tls',
     mail_from_address: props.settings.mail_from_address,
     mail_from_name: props.settings.mail_from_name,
+    logo: null,
+    icon: null,
 });
 
+function onLogo(e) { form.logo = e.target.files[0] || null; }
+function onIcon(e) { form.icon = e.target.files[0] || null; }
+
 function save() {
-    form.patch(route('admin.settings.update'), { preserveScroll: true });
+    form.transform((d) => ({ ...d, _method: 'patch' })).post(route('admin.settings.update'), {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => { form.logo = null; form.icon = null; },
+    });
 }
 
 const testForm = useForm({ test_email: props.settings.alert_email });
@@ -74,6 +83,30 @@ const groups = {
                             <input v-model="form[f.key]" :type="f.type" class="inp" />
                             <p v-if="f.hint" class="mt-1 text-xs text-slate-400">{{ f.hint }}</p>
                             <p v-if="form.errors[f.key]" class="err">{{ form.errors[f.key] }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brand logo & icon -->
+                <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                    <h3 class="font-heading font-semibold text-brand-ink">Logo & icon</h3>
+                    <p class="mt-1 text-sm text-slate-500">Your logo shows in the admin, website header and PDFs. Use a PNG with a transparent background for best results (PDFs need PNG/JPG).</p>
+                    <div class="mt-5 grid gap-6 sm:grid-cols-2">
+                        <div>
+                            <label class="lbl">Brand logo</label>
+                            <div class="mb-2 flex h-14 items-center rounded-xl border border-slate-100 bg-slate-50 px-3">
+                                <img :src="$page.props.site?.logo || '/brand/logo-horizontal.svg'" alt="logo" class="max-h-9 w-auto" />
+                            </div>
+                            <input type="file" accept=".png,.jpg,.jpeg,.svg,.webp" @change="onLogo" class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-brand-gradient file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+                            <p v-if="form.errors.logo" class="err">{{ form.errors.logo }}</p>
+                        </div>
+                        <div>
+                            <label class="lbl">Brand icon (favicon)</label>
+                            <div class="mb-2 flex h-14 items-center rounded-xl border border-slate-100 bg-slate-50 px-3">
+                                <img :src="$page.props.site?.icon || '/brand/icon.svg'" alt="icon" class="h-8 w-8 object-contain" />
+                            </div>
+                            <input type="file" accept=".png,.jpg,.jpeg,.svg,.webp,.ico" @change="onIcon" class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-brand-gradient file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+                            <p v-if="form.errors.icon" class="err">{{ form.errors.icon }}</p>
                         </div>
                     </div>
                 </div>

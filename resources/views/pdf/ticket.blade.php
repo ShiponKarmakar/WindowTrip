@@ -4,8 +4,8 @@
     $phone = \App\Models\Setting::get('support_phone');
     $address = \App\Models\Setting::get('office_address');
     $primary = '#139dd5';
-    $logo = public_path('brand/logo-horizontal.png');
-    $hasLogo = is_file($logo);
+    $logo = \App\Models\Setting::logoPdfPath();
+    $hasLogo = (bool) $logo;
     // Code 128 barcode of the PNR (best-effort; skipped if it can't render).
     $barcode = null;
     if (! empty($ticket->pnr)) {

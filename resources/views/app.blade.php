@@ -6,7 +6,7 @@
 
         <title inertia>{{ config('app.name', 'Window Trip') }}</title>
 
-        <link rel="icon" href="/brand/icon.svg" type="image/svg+xml">
+        <link rel="icon" href="{{ \App\Models\Setting::iconUrl() }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

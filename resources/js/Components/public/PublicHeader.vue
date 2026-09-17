@@ -13,7 +13,7 @@ const mobileOpen = ref(false);
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-20 items-center justify-between">
                 <Link :href="route('home')" class="flex items-center">
-                    <img src="/brand/logo-horizontal.svg" alt="Window Trip" class="h-10 w-auto" />
+                    <img :src="$page.props.site?.logo || '/brand/logo-horizontal.svg'" alt="Window Trip" class="h-10 w-auto" />
                 </Link>
 
                 <nav class="hidden items-center gap-8 text-sm font-medium text-slate-700 md:flex">
