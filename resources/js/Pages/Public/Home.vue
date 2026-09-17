@@ -38,6 +38,13 @@ const testimonials = [
     { name: 'Tanvir Ahmed', role: 'Singapore package', quote: 'Booked the Singapore package for my family. Hotels, transfers, tickets — everything handled perfectly.' },
 ];
 const marquee = [...props.visas, ...props.visas];
+
+const stats = [
+    { count: 12, suffix: 'k+', label: 'Visas processed' },
+    { count: props.visas.length || 7, suffix: '', label: 'Visa destinations' },
+    { count: 4800, suffix: '+', label: 'Happy travellers' },
+    { count: 98, suffix: '%', label: 'On-time delivery' },
+];
 </script>
 
 <template>
@@ -185,11 +192,29 @@ const marquee = [...props.visas, ...props.visas];
                 <span class="text-sm font-semibold uppercase tracking-wider text-brand-purple">How it works</span>
                 <h2 class="mt-2 font-heading text-4xl font-bold text-brand-ink">From idea to boarding pass</h2>
             </div>
-            <div class="mt-16 grid gap-8 md:grid-cols-4" data-animate-group>
-                <div v-for="s in steps" :key="s.n" data-animate class="rounded-3xl border border-slate-100 bg-white p-7 shadow-sm">
-                    <div class="bg-brand-gradient bg-clip-text font-heading text-5xl font-extrabold text-transparent">{{ s.n }}</div>
-                    <h3 class="mt-3 font-heading text-lg font-semibold text-brand-ink">{{ s.title }}</h3>
-                    <p class="mt-2 text-sm text-slate-600">{{ s.desc }}</p>
+            <div class="relative mt-16">
+                <!-- connector line (desktop) -->
+                <div class="pointer-events-none absolute inset-x-8 top-14 hidden h-0.5 bg-gradient-to-r from-brand-purple/10 via-brand-purple/40 to-brand-purple/10 md:block"></div>
+                <div class="grid gap-8 md:grid-cols-4" data-animate-group>
+                    <div v-for="s in steps" :key="s.n" data-animate class="group relative rounded-3xl border border-slate-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-2 hover:border-brand-purple/30 hover:shadow-brand">
+                        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient font-heading text-xl font-extrabold text-white shadow-brand transition duration-300 group-hover:scale-110 group-hover:rotate-3">{{ s.n }}</div>
+                        <h3 class="font-heading text-lg font-semibold text-brand-ink">{{ s.title }}</h3>
+                        <p class="mt-2 text-sm text-slate-600">{{ s.desc }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE STATS -->
+        <section class="relative overflow-hidden py-20" style="background:#121026">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-10 text-center sm:grid-cols-2 lg:grid-cols-4" data-animate-group>
+                    <div v-for="st in stats" :key="st.label" data-animate>
+                        <div class="font-heading text-5xl font-extrabold text-white sm:text-6xl">
+                            <span :data-count="st.count" :data-count-suffix="st.suffix">0</span>
+                        </div>
+                        <div class="mt-2 text-sm font-medium uppercase tracking-wider text-white/60">{{ st.label }}</div>
+                    </div>
                 </div>
             </div>
         </section>
