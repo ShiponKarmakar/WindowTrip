@@ -64,20 +64,19 @@ const badge = (s) => ({
                     <tr>
                         <th class="px-5 py-3">Invoice</th><th class="px-5 py-3">Client</th>
                         <th class="px-5 py-3">Total</th><th class="px-5 py-3">Balance</th>
-                        <th class="px-5 py-3">Status</th><th class="px-5 py-3">Issued</th><th class="px-5 py-3"></th>
+                        <th class="px-5 py-3">Status</th><th class="px-5 py-3">Issued</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     <tr v-for="i in invoices.data" :key="i.id" class="hover:bg-slate-50">
-                        <td class="px-5 py-3 font-mono text-xs text-brand-purple">{{ i.number }}</td>
+                        <td class="px-5 py-3"><Link :href="route('admin.invoices.show', i.id)" class="font-mono text-xs font-semibold text-brand-purple hover:underline">{{ i.number }}</Link></td>
                         <td class="px-5 py-3 font-medium text-brand-ink">{{ i.client_name }}</td>
                         <td class="px-5 py-3">{{ i.currency }} {{ money(i.total) }}</td>
                         <td class="px-5 py-3" :class="i.balance > 0 ? 'text-amber-600' : 'text-slate-400'">{{ money(i.balance) }}</td>
                         <td class="px-5 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-medium capitalize" :class="badge(i.status)">{{ i.status }}</span></td>
                         <td class="px-5 py-3 text-slate-500">{{ i.issue_date }}</td>
-                        <td class="px-5 py-3 text-right"><Link :href="route('admin.invoices.show', i.id)" class="text-sm font-semibold text-brand-purple hover:underline">Open →</Link></td>
                     </tr>
-                    <tr v-if="!invoices.data.length"><td colspan="7" class="px-5 py-12 text-center text-slate-400">No invoices yet.</td></tr>
+                    <tr v-if="!invoices.data.length"><td colspan="6" class="px-5 py-12 text-center text-slate-400">No invoices yet.</td></tr>
                 </tbody>
             </table>
         </div>

@@ -62,12 +62,11 @@ const statusBadge = (s) => ({
                         <th class="px-5 py-3">Type</th>
                         <th class="px-5 py-3">Status</th>
                         <th class="px-5 py-3">Date</th>
-                        <th class="px-5 py-3"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     <tr v-for="a in applications.data" :key="a.id" class="hover:bg-slate-50">
-                        <td class="px-5 py-3 font-mono text-xs text-brand-purple">{{ a.reference }}</td>
+                        <td class="px-5 py-3"><Link :href="`/admin/applications/${a.id}`" class="font-mono text-xs font-semibold text-brand-purple hover:underline">{{ a.reference }}</Link></td>
                         <td class="px-5 py-3">
                             <div class="font-medium text-brand-ink">{{ a.name }}</div>
                             <div class="text-xs text-slate-400">{{ a.email }}</div>
@@ -78,12 +77,9 @@ const statusBadge = (s) => ({
                             <span class="rounded-full px-2.5 py-1 text-xs font-medium capitalize" :class="statusBadge(a.status)">{{ a.status.replace('_', ' ') }}</span>
                         </td>
                         <td class="px-5 py-3 text-slate-500">{{ a.created }}</td>
-                        <td class="px-5 py-3 text-right">
-                            <Link :href="`/admin/applications/${a.id}`" class="text-sm font-semibold text-brand-purple hover:underline">Review →</Link>
-                        </td>
                     </tr>
                     <tr v-if="!applications.data.length">
-                        <td colspan="7" class="px-5 py-12 text-center text-slate-400">No applications match your filters.</td>
+                        <td colspan="6" class="px-5 py-12 text-center text-slate-400">No applications match your filters.</td>
                     </tr>
                 </tbody>
             </table>
