@@ -109,26 +109,29 @@ const contact = [
                     <div class="mt-3 space-y-2">
                         <a v-if="application.has_passport_scan" :href="`/admin/applications/${application.id}/document/passport`" target="_blank"
                             class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm hover:bg-slate-100">
-                            <span>📄 Passport scan</span><span class="text-brand-purple">Open →</span>
+                            <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8zM14 3v5h5"/></svg>Passport scan</span><span class="text-brand-purple">Open →</span>
                         </a>
                         <a v-if="application.has_photo" :href="`/admin/applications/${application.id}/document/photo`" target="_blank"
                             class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm hover:bg-slate-100">
-                            <span>🖼️ Photo</span><span class="text-brand-purple">Open →</span>
+                            <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 16l-5-5L5 20"/></svg>Photo</span><span class="text-brand-purple">Open →</span>
                         </a>
                         <p v-if="!application.has_passport_scan && !application.has_photo" class="text-sm text-slate-400">No documents uploaded.</p>
                     </div>
                 </div>
 
                 <Link :href="route('admin.applications.edit', application.id)" class="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
-                    ✏️ Edit application
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4v16h16v-7M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit application
                 </Link>
 
                 <Link :href="route('admin.invoices.create', { application: application.id })" class="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
-                    🧾 Create invoice
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h6M6 3h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1z"/></svg>
+                    Create invoice
                 </Link>
 
                 <Link :href="route('admin.tickets.create', { application: application.id })" class="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-center text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
-                    ✈️ Create flight ticket
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L11 19v-5.5L21 16z"/></svg>
+                    Create flight ticket
                 </Link>
 
                 <Link :href="route('admin.applications.compose', application.id)" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-white shadow-brand hover:opacity-90">
