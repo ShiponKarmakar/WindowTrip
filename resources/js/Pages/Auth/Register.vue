@@ -5,6 +5,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 const form = useForm({
     name: '',
     email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
 });
@@ -48,6 +49,20 @@ const submit = () => {
                     class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple"
                 />
                 <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+            </div>
+
+            <div>
+                <label for="phone" class="mb-1.5 block text-sm font-medium text-slate-700">Phone number</label>
+                <input
+                    id="phone"
+                    type="tel"
+                    v-model="form.phone"
+                    required
+                    autocomplete="tel"
+                    placeholder="+880 1XXXXXXXXX"
+                    class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple"
+                />
+                <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
             </div>
 
             <div class="grid gap-5 sm:grid-cols-2">
