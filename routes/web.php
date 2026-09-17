@@ -161,6 +161,7 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::get('/invoices/{invoice}/voucher', [InvoiceController::class, 'voucher'])->name('invoices.voucher');
     Route::post('/invoices/{invoice}/payment', [InvoiceController::class, 'payment'])->name('invoices.payment');
     Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
     Route::post('/invoices/{invoice}/email', [InvoiceController::class, 'email'])->name('invoices.email');

@@ -11,6 +11,7 @@ use App\Notifications\InvoiceIssued;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class InvoiceController extends Controller
@@ -110,6 +111,8 @@ class InvoiceController extends Controller
         $invoice->recalculate();
         $invoice->save();
 
+        $this->handleVoucher($request, $invoice);
+
         return redirect()->route('admin.invoices.show', $invoice->id)->with('success', 'Invoice '.$invoice->number.' created.');
     }
 
@@ -120,7 +123,40 @@ class InvoiceController extends Controller
         $invoice->recalculate();
         $invoice->save();
 
+        $this->handleVoucher($request, $invoice);
+
         return redirect()->route('admin.invoices.show', $invoice->id)->with('success', 'Invoice updated.');
+    }
+
+    /** Store the optional uploaded voucher, replacing any previous one. */
+    private function handleVoucher(Request $request, Invoice $invoice): void
+    {
+        $request->validate([
+            'voucher' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:8192'],
+        ]);
+
+        if (! $request->hasFile('voucher')) {
+            return;
+        }
+
+        if ($invoice->voucher_path) {
+            Storage::disk('local')->delete($invoice->voucher_path);
+        }
+
+        $file = $request->file('voucher');
+        $invoice->voucher_path = $file->store("invoices/{$invoice->number}", 'local');
+        $invoice->voucher_name = $file->getClientOriginalName();
+        $invoice->save();
+    }
+
+    /** Stream the privately-stored voucher. */
+    public function voucher(Invoice $invoice)
+    {
+        abort_unless($invoice->voucher_path, 404);
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($invoice->voucher_path), 404);
+
+        return $disk->response($invoice->voucher_path);
     }
 
     public function show(Invoice $invoice)
@@ -130,6 +166,7 @@ class InvoiceController extends Controller
                 'balance' => $invoice->balance(),
                 'issue_date' => $invoice->issue_date?->format('Y-m-d'),
                 'due_date' => $invoice->due_date?->format('Y-m-d'),
+                'has_voucher' => (bool) $invoice->voucher_path,
             ]),
             'statuses' => self::STATUSES,
         ]);
@@ -137,6 +174,9 @@ class InvoiceController extends Controller
 
     public function destroy(Invoice $invoice)
     {
+        if ($invoice->voucher_path) {
+            Storage::disk('local')->delete($invoice->voucher_path);
+        }
         $invoice->delete();
 
         return redirect()->route('admin.invoices.index')->with('success', 'Invoice deleted.');

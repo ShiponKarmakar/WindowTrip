@@ -30,6 +30,7 @@ const form = useForm({
     tax: Number(inv.tax || 0),
     status: inv.status || 'draft',
     notes: inv.notes || '',
+    voucher: null,
     items: inv.items?.length
         ? inv.items.map((i) => ({ description: i.description, qty: Number(i.qty), unit_price: Number(i.unit_price) }))
         : [{ description: pf.item || '', qty: 1, unit_price: 0 }],
@@ -46,9 +47,14 @@ function onClientSelect(client) {
     form.client_phone = client.phone || '';
 }
 function addItem() { form.items.push({ description: '', qty: 1, unit_price: 0 }); }
+function onVoucher(e) { form.voucher = e.target.files[0] || null; }
 function submit() {
-    const opts = { preserveScroll: true };
-    isEdit ? form.put(route('admin.invoices.update', props.invoice.id), opts) : form.post(route('admin.invoices.store'), opts);
+    const opts = { preserveScroll: true, forceFormData: true };
+    if (isEdit) {
+        form.transform((d) => ({ ...d, _method: 'put' })).post(route('admin.invoices.update', props.invoice.id), opts);
+    } else {
+        form.post(route('admin.invoices.store'), opts);
+    }
 }
 </script>
 
@@ -112,6 +118,15 @@ function submit() {
             <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <label class="lbl">Notes <span class="text-slate-500">(optional)</span></label>
                 <textarea v-model="form.notes" rows="3" placeholder="Payment instructions, bank details, thank-you note…" class="inp"></textarea>
+            </div>
+
+            <!-- Voucher upload -->
+            <div class="rounded-2xl border border-dashed border-brand-purple/30 bg-brand-50/40 p-6">
+                <h3 class="font-heading font-semibold text-brand-ink">Voucher <span class="text-slate-500">(optional)</span></h3>
+                <p class="mt-1 text-sm text-slate-500">Attach a payment voucher, receipt or supporting document (PDF or image). Stored privately with this invoice.</p>
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg" @change="onVoucher" class="mt-3 block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-brand-gradient file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+                <p v-if="isEdit && inv.voucher_name" class="mt-2 text-xs text-slate-500">Current file: <span class="font-medium">{{ inv.voucher_name }}</span> — uploading a new one replaces it.</p>
+                <p v-if="form.errors.voucher" class="err">{{ form.errors.voucher }}</p>
             </div>
 
             <div v-if="form.hasErrors" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">Please fix the highlighted fields before saving.</div>
