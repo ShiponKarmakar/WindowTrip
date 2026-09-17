@@ -6,6 +6,16 @@
     $primary = '#139dd5';
     $logo = public_path('brand/logo-horizontal.png');
     $hasLogo = is_file($logo);
+    // Code 128 barcode of the PNR (best-effort; skipped if it can't render).
+    $barcode = null;
+    if (! empty($ticket->pnr)) {
+        try {
+            $gen = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = base64_encode($gen->getBarcode(strtoupper($ticket->pnr), $gen::TYPE_CODE_128, 2, 44));
+        } catch (\Throwable $e) {
+            $barcode = null;
+        }
+    }
     $fmt = function ($v) {
         if (! $v) return ['date' => '—', 'time' => ''];
         try { $d = \Illuminate\Support\Carbon::parse($v); return ['date' => $d->format('d M Y'), 'time' => $d->format('H:i')]; }
@@ -95,6 +105,12 @@
                     </td>
                 </tr></table>
                 @if($ticket->booking_ref)<div class="muted" style="margin-top:6px">Airline ref: {{ strtoupper($ticket->booking_ref) }}</div>@endif
+                @if($barcode)
+                    <div style="margin-top:10px">
+                        <img src="data:image/png;base64,{{ $barcode }}" alt="PNR barcode" style="height:40px; width:auto" />
+                        <div style="font-family: DejaVu Sans Mono, monospace; font-size:9px; letter-spacing:2px; color:#6b7280; margin-top:2px">{{ strtoupper($ticket->pnr) }}</div>
+                    </div>
+                @endif
             </td>
         </tr>
     </table>
