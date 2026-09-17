@@ -28,7 +28,24 @@ function onKeydown(e) {
         searchInput.value?.focus();
     }
 }
-onMounted(() => document.addEventListener('keydown', onKeydown));
+
+// Theme toggle (forward-compatible: sets the `dark` class + persists; full
+// dark theming of pages is a later pass).
+const isDark = ref(false);
+function applyTheme() {
+    document.documentElement.classList.toggle('dark', isDark.value);
+}
+function toggleTheme() {
+    isDark.value = !isDark.value;
+    try { localStorage.setItem('wt-theme', isDark.value ? 'dark' : 'light'); } catch (e) { /* ignore */ }
+    applyTheme();
+}
+
+onMounted(() => {
+    document.addEventListener('keydown', onKeydown);
+    try { isDark.value = localStorage.getItem('wt-theme') === 'dark'; } catch (e) { /* ignore */ }
+    applyTheme();
+});
 onUnmounted(() => document.removeEventListener('keydown', onKeydown));
 
 const runSearch = debounce(async (q) => {
@@ -126,7 +143,7 @@ function closeMenu() {
                         v-model="search"
                         @focus="search.length >= 2 && (searchOpen = true)"
                         type="text"
-                        placeholder="Search tickets, invoices, clients…"
+                        placeholder="Search…"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-14 text-sm text-brand-ink placeholder:text-slate-400 focus:border-brand-purple focus:bg-white focus:ring-1 focus:ring-brand-purple"
                     />
                     <kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center rounded-md border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[11px] font-medium text-slate-400 sm:inline-flex">⌘K</kbd>
@@ -145,20 +162,18 @@ function closeMenu() {
                     </div>
                 </div>
 
-                <div class="ml-auto flex shrink-0 items-center gap-2.5">
-                    <!-- Notifications -->
-                    <button type="button" title="Notifications" class="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 transition hover:bg-slate-50 hover:text-brand-purple">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 1 1-6 0"/></svg>
+                <div class="ml-auto flex shrink-0 items-center gap-2">
+                    <!-- Theme toggle -->
+                    <button type="button" @click="toggleTheme" :title="isDark ? 'Switch to light' : 'Switch to dark'" class="rounded-full p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-brand-ink">
+                        <svg v-if="!isDark" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                        <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4 12H2m20 0h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
                     </button>
 
                     <!-- Profile dropdown -->
                     <div class="relative" v-click-outside="closeMenu">
-                        <button @click="menuOpen = !menuOpen" class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 transition hover:bg-slate-50">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">{{ user?.name?.charAt(0) }}</span>
-                            <span class="hidden text-left leading-tight sm:block">
-                                <span class="block text-sm font-semibold text-brand-ink">{{ user?.name }}</span>
-                                <span class="block text-xs text-slate-400">{{ roleLabel }}</span>
-                            </span>
+                        <button @click="menuOpen = !menuOpen" class="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition hover:bg-slate-100">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">{{ user?.name?.charAt(0) }}</span>
+                            <span class="hidden text-sm font-semibold text-brand-ink sm:block">{{ user?.name }}</span>
                             <svg class="h-4 w-4 text-slate-400 transition" :class="menuOpen && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
