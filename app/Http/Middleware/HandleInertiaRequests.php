@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
                 'admin' => Auth::guard('admin')->user(),
                 'isAdmin' => (bool) Auth::guard('admin')->user()?->hasAnyRole(['admin', 'agent']),
                 'adminRole' => Auth::guard('admin')->user()?->getRoleNames()->first(),
+                'can' => $this->adminAbilities(),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -62,5 +63,22 @@ class HandleInertiaRequests extends Middleware
                 'hours' => \App\Models\Setting::get('office_hours'),
             ],
         ];
+    }
+
+    /** Feature => bool map of what the current admin user may access. */
+    private function adminAbilities(): array
+    {
+        $user = Auth::guard('admin')->user();
+        if (! $user) {
+            return [];
+        }
+
+        $isAdmin = $user->hasRole('admin');
+        $abilities = [];
+        foreach (\App\Support\Features::keys() as $key) {
+            $abilities[$key] = $isAdmin || $user->hasPermissionTo($key, 'web');
+        }
+
+        return $abilities;
     }
 }

@@ -30,16 +30,22 @@ class User extends Authenticatable
         return $this->hasMany(FlightTicket::class);
     }
 
-    /** Is this user a staff member (admin/agent) rather than a client? */
+    /** Is this user a staff member (has any role) rather than a client? */
     public function isStaff(): bool
     {
-        return $this->hasAnyRole(['admin', 'agent']);
+        return $this->roles()->exists();
     }
 
-    /** Scope to clients only — users without a staff role. */
+    /** Scope to clients only — users with no role at all. */
     public function scopeClients(Builder $query): Builder
     {
-        return $query->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', ['admin', 'agent']));
+        return $query->whereDoesntHave('roles');
+    }
+
+    /** Scope to staff — users with at least one role. */
+    public function scopeStaff(Builder $query): Builder
+    {
+        return $query->whereHas('roles');
     }
 
     /**

@@ -35,8 +35,8 @@ class AuthController extends Controller
 
         $user = Auth::guard('admin')->user();
 
-        // Only staff may hold an admin session.
-        if (! $user->hasAnyRole(['admin', 'agent'])) {
+        // Only staff (users with any role) may hold an admin session.
+        if (! $user->isStaff()) {
             Auth::guard('admin')->logout();
 
             throw ValidationException::withMessages([

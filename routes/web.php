@@ -128,73 +128,106 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
 
     // Finance (income & expense)
-    Route::get('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'index'])->name('finance.index');
-    Route::get('/finance/create', [\App\Http\Controllers\Admin\FinanceController::class, 'create'])->name('finance.create');
-    Route::post('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'store'])->name('finance.store');
-    Route::get('/finance/{transaction}/edit', [\App\Http\Controllers\Admin\FinanceController::class, 'edit'])->name('finance.edit');
-    Route::match(['put', 'patch'], '/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'update'])->name('finance.update');
-    Route::delete('/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'destroy'])->name('finance.destroy');
-    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
-    Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
-    Route::patch('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
-    Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
-    Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
-    Route::get('/applications/{application}/email', [ApplicationController::class, 'compose'])->name('applications.compose');
-    Route::post('/applications/{application}/message', [ApplicationController::class, 'message'])->name('applications.message');
-    Route::get('/applications/{application}/document/{type}', [ApplicationController::class, 'document'])->name('applications.document');
+    Route::middleware('admincan:finance')->group(function () {
+        Route::get('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'index'])->name('finance.index');
+        Route::get('/finance/create', [\App\Http\Controllers\Admin\FinanceController::class, 'create'])->name('finance.create');
+        Route::post('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'store'])->name('finance.store');
+        Route::get('/finance/{transaction}/edit', [\App\Http\Controllers\Admin\FinanceController::class, 'edit'])->name('finance.edit');
+        Route::match(['put', 'patch'], '/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'update'])->name('finance.update');
+        Route::delete('/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'destroy'])->name('finance.destroy');
+    });
 
-    Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
-    Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
+    Route::middleware('admincan:applications')->group(function () {
+        Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+        Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
+        Route::patch('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
+        Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+        Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+        Route::get('/applications/{application}/email', [ApplicationController::class, 'compose'])->name('applications.compose');
+        Route::post('/applications/{application}/message', [ApplicationController::class, 'message'])->name('applications.message');
+        Route::get('/applications/{application}/document/{type}', [ApplicationController::class, 'document'])->name('applications.document');
+    });
+
+    Route::middleware('admincan:leads')->group(function () {
+        Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+        Route::patch('/leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.status');
+    });
 
     // Clients (order: literal /create before /{client})
-    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
-    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
-    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
-    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
-    Route::match(['put', 'patch'], '/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
-    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
-    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::middleware('admincan:clients')->group(function () {
+        Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+        Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+        Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+        Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+        Route::match(['put', 'patch'], '/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+        Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+        Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    });
 
     // Invoices (order: literal /create before /{invoice})
-    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
-    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-    Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
-    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
-    Route::get('/invoices/{invoice}/voucher', [InvoiceController::class, 'voucher'])->name('invoices.voucher');
-    Route::post('/invoices/{invoice}/payment', [InvoiceController::class, 'payment'])->name('invoices.payment');
-    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
-    Route::post('/invoices/{invoice}/email', [InvoiceController::class, 'email'])->name('invoices.email');
-    Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
-    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::middleware('admincan:invoices')->group(function () {
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+        Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+        Route::get('/invoices/{invoice}/voucher', [InvoiceController::class, 'voucher'])->name('invoices.voucher');
+        Route::post('/invoices/{invoice}/payment', [InvoiceController::class, 'payment'])->name('invoices.payment');
+        Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
+        Route::post('/invoices/{invoice}/email', [InvoiceController::class, 'email'])->name('invoices.email');
+        Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    });
 
     // Flight tickets (order: literal /create before /{flightTicket})
-    Route::get('/tickets', [FlightTicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/create', [FlightTicketController::class, 'create'])->name('tickets.create');
-    Route::post('/tickets/parse', [FlightTicketController::class, 'parse'])->name('tickets.parse');
-    Route::post('/tickets', [FlightTicketController::class, 'store'])->name('tickets.store');
-    Route::get('/tickets/{flightTicket}/edit', [FlightTicketController::class, 'edit'])->name('tickets.edit');
-    Route::get('/tickets/{flightTicket}/pdf', [FlightTicketController::class, 'pdf'])->name('tickets.pdf');
-    Route::get('/tickets/{flightTicket}/source', [FlightTicketController::class, 'source'])->name('tickets.source');
-    Route::patch('/tickets/{flightTicket}/status', [FlightTicketController::class, 'status'])->name('tickets.status');
-    Route::post('/tickets/{flightTicket}/email', [FlightTicketController::class, 'email'])->name('tickets.email');
-    Route::match(['put', 'patch'], '/tickets/{flightTicket}', [FlightTicketController::class, 'update'])->name('tickets.update');
-    Route::get('/tickets/{flightTicket}', [FlightTicketController::class, 'show'])->name('tickets.show');
-    Route::delete('/tickets/{flightTicket}', [FlightTicketController::class, 'destroy'])->name('tickets.destroy');
+    Route::middleware('admincan:tickets')->group(function () {
+        Route::get('/tickets', [FlightTicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/create', [FlightTicketController::class, 'create'])->name('tickets.create');
+        Route::post('/tickets/parse', [FlightTicketController::class, 'parse'])->name('tickets.parse');
+        Route::post('/tickets', [FlightTicketController::class, 'store'])->name('tickets.store');
+        Route::get('/tickets/{flightTicket}/edit', [FlightTicketController::class, 'edit'])->name('tickets.edit');
+        Route::get('/tickets/{flightTicket}/pdf', [FlightTicketController::class, 'pdf'])->name('tickets.pdf');
+        Route::get('/tickets/{flightTicket}/source', [FlightTicketController::class, 'source'])->name('tickets.source');
+        Route::patch('/tickets/{flightTicket}/status', [FlightTicketController::class, 'status'])->name('tickets.status');
+        Route::post('/tickets/{flightTicket}/email', [FlightTicketController::class, 'email'])->name('tickets.email');
+        Route::match(['put', 'patch'], '/tickets/{flightTicket}', [FlightTicketController::class, 'update'])->name('tickets.update');
+        Route::get('/tickets/{flightTicket}', [FlightTicketController::class, 'show'])->name('tickets.show');
+        Route::delete('/tickets/{flightTicket}', [FlightTicketController::class, 'destroy'])->name('tickets.destroy');
+    });
 
     // Catalog management
-    Route::resource('visas', VisaCountryController::class)
+    Route::middleware('admincan:visas')->resource('visas', VisaCountryController::class)
         ->parameters(['visas' => 'visa'])->except(['show']);
-    Route::resource('packages', PackageController::class)->except(['show']);
+    Route::middleware('admincan:packages')->resource('packages', PackageController::class)->except(['show']);
 
-    // Profile & settings (admin guard)
+    // Staff & roles
+    Route::middleware('admincan:staff')->group(function () {
+        Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('staff.index');
+        Route::get('/staff/create', [\App\Http\Controllers\Admin\StaffController::class, 'create'])->name('staff.create');
+        Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->name('staff.store');
+        Route::get('/staff/{staff}/edit', [\App\Http\Controllers\Admin\StaffController::class, 'edit'])->name('staff.edit');
+        Route::match(['put', 'patch'], '/staff/{staff}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->name('staff.update');
+        Route::delete('/staff/{staff}', [\App\Http\Controllers\Admin\StaffController::class, 'destroy'])->name('staff.destroy');
+
+        Route::get('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/create', [\App\Http\Controllers\Admin\RoleController::class, 'create'])->name('roles.create');
+        Route::post('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'store'])->name('roles.store');
+        Route::get('/roles/{role}/edit', [\App\Http\Controllers\Admin\RoleController::class, 'edit'])->name('roles.edit');
+        Route::match(['put', 'patch'], '/roles/{role}', [\App\Http\Controllers\Admin\RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [\App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('admincan:settings')->group(function () {
+        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
+        Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/test-email', [SettingsController::class, 'test'])->name('settings.test');
+    });
+
+    // Profile — any staff member can manage their own.
     Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile');
     Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [\App\Http\Controllers\Admin\ProfileController::class, 'password'])->name('profile.password');
-    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
-    Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::post('/settings/test-email', [SettingsController::class, 'test'])->name('settings.test');
 });
 
 require __DIR__.'/auth.php';

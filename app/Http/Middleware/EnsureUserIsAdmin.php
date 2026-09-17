@@ -20,7 +20,7 @@ class EnsureUserIsAdmin
 
         $user = Auth::guard('admin')->user();
 
-        abort_unless($user && $user->hasAnyRole(['admin', 'agent']), 403);
+        abort_unless($user && $user->isStaff(), 403);
 
         return $next($request);
     }
