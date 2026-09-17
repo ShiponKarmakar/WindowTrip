@@ -126,6 +126,14 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
+
+    // Finance (income & expense)
+    Route::get('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'index'])->name('finance.index');
+    Route::get('/finance/create', [\App\Http\Controllers\Admin\FinanceController::class, 'create'])->name('finance.create');
+    Route::post('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'store'])->name('finance.store');
+    Route::get('/finance/{transaction}/edit', [\App\Http\Controllers\Admin\FinanceController::class, 'edit'])->name('finance.edit');
+    Route::match(['put', 'patch'], '/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'update'])->name('finance.update');
+    Route::delete('/finance/{transaction}', [\App\Http\Controllers\Admin\FinanceController::class, 'destroy'])->name('finance.destroy');
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
     Route::patch('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');

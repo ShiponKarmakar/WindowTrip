@@ -68,6 +68,7 @@ const nav = [
     { label: 'Clients', href: '/admin/clients', icon: 'M17 20h5v-1a4 4 0 0 0-4-4h-1m-6 5H2v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1zm-2-11a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm7 1a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z' },
     { label: 'Invoices', href: '/admin/invoices', icon: 'M9 12h6m-6 4h6M9 8h6M6 3h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1z' },
     { label: 'Flight Tickets', href: '/admin/tickets', icon: 'M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L11 19v-5.5L21 16z' },
+    { label: 'Finance', href: '/admin/finance', icon: 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' },
     { label: 'Visa Destinations', href: '/admin/visas', icon: 'M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z' },
     { label: 'Tour Packages', href: '/admin/packages', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
 ];
