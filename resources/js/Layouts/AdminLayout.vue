@@ -28,24 +28,7 @@ function onKeydown(e) {
         searchInput.value?.focus();
     }
 }
-
-// Theme toggle (forward-compatible: sets the `dark` class + persists; full
-// dark theming of pages is a later pass).
-const isDark = ref(false);
-function applyTheme() {
-    document.documentElement.classList.toggle('dark', isDark.value);
-}
-function toggleTheme() {
-    isDark.value = !isDark.value;
-    try { localStorage.setItem('wt-theme', isDark.value ? 'dark' : 'light'); } catch (e) { /* ignore */ }
-    applyTheme();
-}
-
-onMounted(() => {
-    document.addEventListener('keydown', onKeydown);
-    try { isDark.value = localStorage.getItem('wt-theme') === 'dark'; } catch (e) { /* ignore */ }
-    applyTheme();
-});
+onMounted(() => document.addEventListener('keydown', onKeydown));
 onUnmounted(() => document.removeEventListener('keydown', onKeydown));
 
 const runSearch = debounce(async (q) => {
@@ -60,7 +43,7 @@ const runSearch = debounce(async (q) => {
     } finally {
         searching.value = false;
     }
-}, 250);
+}, 150);
 
 watch(search, (v) => runSearch(v));
 
@@ -135,8 +118,8 @@ function closeMenu() {
                     <slot name="title">Admin</slot>
                 </h1>
 
-                <!-- Global search -->
-                <div class="relative w-full max-w-sm" v-click-outside="closeSearch">
+                <!-- Global search (pushed to the right) -->
+                <div class="relative ml-auto w-full max-w-sm" v-click-outside="closeSearch">
                     <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
                     <input
                         ref="searchInput"
@@ -162,13 +145,7 @@ function closeMenu() {
                     </div>
                 </div>
 
-                <div class="ml-auto flex shrink-0 items-center gap-2">
-                    <!-- Theme toggle -->
-                    <button type="button" @click="toggleTheme" :title="isDark ? 'Switch to light' : 'Switch to dark'" class="rounded-full p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-brand-ink">
-                        <svg v-if="!isDark" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-                        <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4 12H2m20 0h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
-                    </button>
-
+                <div class="flex shrink-0 items-center gap-2">
                     <!-- Profile dropdown -->
                     <div class="relative" v-click-outside="closeMenu">
                         <button @click="menuOpen = !menuOpen" class="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition hover:bg-slate-100">
