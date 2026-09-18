@@ -1,7 +1,7 @@
 <script setup>
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
     visas: { type: Array, default: () => [] },
@@ -39,12 +39,20 @@ const testimonials = [
 ];
 const marquee = [...props.visas, ...props.visas];
 
-const stats = [
-    { count: 12, suffix: 'k+', label: 'Visas processed' },
-    { count: props.visas.length || 7, suffix: '', label: 'Visa destinations' },
-    { count: 4800, suffix: '+', label: 'Happy travellers' },
-    { count: 98, suffix: '%', label: 'On-time delivery' },
-];
+// Interactive "How it works" stepper — auto-advances, pauses on hover.
+const active = ref(0);
+let stepTimer = null;
+const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function startStepper() {
+    if (reduceMotion || stepTimer) return;
+    stepTimer = setInterval(() => { active.value = (active.value + 1) % steps.length; }, 2200);
+}
+function stopStepper() { clearInterval(stepTimer); stepTimer = null; }
+function focusStep(i) { active.value = i; stopStepper(); }
+
+onMounted(startStepper);
+onBeforeUnmount(stopStepper);
 </script>
 
 <template>
@@ -192,29 +200,38 @@ const stats = [
                 <span class="text-sm font-semibold uppercase tracking-wider text-brand-purple">How it works</span>
                 <h2 class="mt-2 font-heading text-4xl font-bold text-brand-ink">From idea to boarding pass</h2>
             </div>
-            <div class="relative mt-16">
-                <!-- connector line (desktop) -->
-                <div class="pointer-events-none absolute inset-x-8 top-14 hidden h-0.5 bg-gradient-to-r from-brand-purple/10 via-brand-purple/40 to-brand-purple/10 md:block"></div>
-                <div class="grid gap-8 md:grid-cols-4" data-animate-group>
-                    <div v-for="s in steps" :key="s.n" data-animate class="group relative rounded-3xl border border-slate-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-2 hover:border-brand-purple/30 hover:shadow-brand">
-                        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient font-heading text-xl font-extrabold text-white shadow-brand transition duration-300 group-hover:scale-110 group-hover:rotate-3">{{ s.n }}</div>
-                        <h3 class="font-heading text-lg font-semibold text-brand-ink">{{ s.title }}</h3>
+            <div class="relative mt-16" data-animate @mouseleave="startStepper">
+                <div class="grid gap-8 md:grid-cols-4">
+                    <div
+                        v-for="(s, i) in steps"
+                        :key="s.n"
+                        @mouseenter="focusStep(i)"
+                        class="group relative cursor-default rounded-3xl border bg-white p-7 transition-all duration-500"
+                        :class="active === i ? '-translate-y-2 border-brand-purple/40 shadow-brand' : 'border-slate-100 shadow-sm hover:-translate-y-1'"
+                    >
+                        <div
+                            class="relative z-10 mb-4 flex h-14 w-14 items-center justify-center rounded-2xl font-heading text-xl font-extrabold transition-all duration-500"
+                            :class="active >= i ? 'bg-brand-gradient text-white shadow-brand' : 'bg-slate-100 text-slate-400'"
+                        >
+                            <span :class="active === i && 'animate-pulse-badge'">{{ s.n }}</span>
+                            <span v-if="active === i" class="absolute inset-0 rounded-2xl ring-4 ring-brand-purple/20"></span>
+                        </div>
+                        <h3 class="font-heading text-lg font-semibold transition-colors duration-300" :class="active === i ? 'text-brand-purple' : 'text-brand-ink'">{{ s.title }}</h3>
                         <p class="mt-2 text-sm text-slate-600">{{ s.desc }}</p>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- LIVE STATS -->
-        <section class="relative overflow-hidden py-20" style="background:#121026">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-10 text-center sm:grid-cols-2 lg:grid-cols-4" data-animate-group>
-                    <div v-for="st in stats" :key="st.label" data-animate>
-                        <div class="font-heading text-5xl font-extrabold text-white sm:text-6xl">
-                            <span :data-count="st.count" :data-count-suffix="st.suffix">0</span>
-                        </div>
-                        <div class="mt-2 text-sm font-medium uppercase tracking-wider text-white/60">{{ st.label }}</div>
-                    </div>
+                <!-- progress dots (mobile + a subtle desktop control) -->
+                <div class="mt-8 flex justify-center gap-2">
+                    <button
+                        v-for="(s, i) in steps"
+                        :key="'dot-' + i"
+                        type="button"
+                        @click="focusStep(i)"
+                        :aria-label="`Step ${s.n}`"
+                        class="h-2 rounded-full transition-all duration-300"
+                        :class="active === i ? 'w-8 bg-brand-purple' : 'w-2 bg-slate-200 hover:bg-slate-300'"
+                    ></button>
                 </div>
             </div>
         </section>
@@ -303,3 +320,11 @@ const stats = [
         </section>
     </PublicLayout>
 </template>
+
+<style scoped>
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+}
+.animate-pulse-badge { display: inline-block; animation: pulse-badge 1.6s ease-in-out infinite; }
+</style>
