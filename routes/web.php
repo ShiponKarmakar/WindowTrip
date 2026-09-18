@@ -109,6 +109,16 @@ Route::middleware('auth')->group(function () {
     // Customer e-tickets (named my-tickets.* to avoid clashing with the public air-tickets page)
     Route::get('/my-tickets', [\App\Http\Controllers\PortalTicketController::class, 'index'])->name('my-tickets.index');
     Route::get('/my-tickets/{flightTicket}/pdf', [\App\Http\Controllers\PortalTicketController::class, 'pdf'])->name('my-tickets.pdf');
+
+    // Stop impersonating a client and return to the admin panel.
+    Route::post('/stop-impersonating', function () {
+        if (session('impersonator_admin_id')) {
+            session()->forget('impersonator_admin_id');
+            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        }
+
+        return redirect('/admin');
+    })->name('impersonate.stop');
 });
 
 /*
@@ -162,6 +172,7 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::match(['put', 'patch'], '/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
         Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
         Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+        Route::post('/clients/{client}/login-as', [ClientController::class, 'loginAs'])->name('clients.login-as');
     });
 
     // Invoices (order: literal /create before /{invoice})

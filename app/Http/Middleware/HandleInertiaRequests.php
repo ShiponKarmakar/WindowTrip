@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'impersonating' => (bool) $request->session()->get('impersonator_admin_id'),
                 // Admin guard runs independently of the customer (web) session.
                 'admin' => Auth::guard('admin')->user(),
                 'isAdmin' => (bool) Auth::guard('admin')->user()?->hasAnyRole(['admin', 'agent']),

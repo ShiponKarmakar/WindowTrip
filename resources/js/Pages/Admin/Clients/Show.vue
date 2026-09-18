@@ -18,6 +18,11 @@ const tkBadge = (s) => ({
     draft: 'bg-slate-100 text-slate-500', issued: 'bg-emerald-50 text-emerald-600', cancelled: 'bg-red-50 text-red-500',
 }[s] || 'bg-slate-100 text-slate-500');
 
+function loginAs() {
+    if (confirm(`Log in to the customer portal as ${c.name}? You can return to admin anytime.`)) {
+        router.post(route('admin.clients.login-as', c.id));
+    }
+}
 function remove() {
     if (confirm(`Delete client ${c.name}? Their invoices and tickets are kept but unlinked. This cannot be undone.`)) {
         router.delete(route('admin.clients.destroy', c.id));
@@ -41,6 +46,10 @@ function remove() {
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L11 19v-5.5L21 16z"/></svg>
                     New ticket
                 </Link>
+                <button @click="loginAs" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                    Login as client
+                </button>
                 <Link :href="route('admin.clients.edit', c.id)" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-brand-ink hover:border-brand-purple/40">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4v16h16v-7M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     Edit

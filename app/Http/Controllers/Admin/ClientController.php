@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -124,6 +125,18 @@ class ClientController extends Controller
                 'issue_date' => $t->issue_date?->format('d M Y'),
             ]),
         ]);
+    }
+
+    /** Log the admin into the customer portal as this client (impersonate). */
+    public function loginAs(User $client)
+    {
+        abort_if($client->isStaff(), 403, 'You cannot log in as a staff account.');
+
+        // Remember who is impersonating (admin guard stays logged in separately).
+        session(['impersonator_admin_id' => Auth::guard('admin')->id()]);
+        Auth::guard('web')->login($client);
+
+        return redirect()->route('dashboard')->with('success', 'You are now viewing the portal as '.$client->name.'.');
     }
 
     public function destroy(User $client)

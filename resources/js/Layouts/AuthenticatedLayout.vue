@@ -4,13 +4,25 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+const impersonating = computed(() => page.props.auth?.impersonating);
+function stopImpersonating() {
+    router.post(route('impersonate.stop'));
+}
 </script>
 
 <template>
     <div>
+        <!-- Impersonation banner -->
+        <div v-if="impersonating" class="flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-2 text-center text-sm font-medium text-white">
+            <span>👁 You're viewing this portal as a client.</span>
+            <button @click="stopImpersonating" class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold ring-1 ring-white/40 hover:bg-white/30">Return to admin</button>
+        </div>
+
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
