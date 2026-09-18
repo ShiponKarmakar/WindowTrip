@@ -26,6 +26,9 @@ const form = useForm({
     date_of_birth: '',
     gender: '',
     nationality: 'Bangladeshi',
+    present_address: '',
+    occupation: '',
+    purpose: '',
     passport_number: '',
     passport_expiry: '',
     email: props.prefill?.email || '',
@@ -41,13 +44,17 @@ const progress = computed(() => Math.round((current.value / (steps.length - 1)) 
 const stepValid = computed(() => {
     switch (steps[current.value].key) {
         case 'trip':
-            return form.visa_type && form.travellers >= 1;
+            return form.visa_type && form.travellers >= 1 && form.purpose.trim().length > 1;
         case 'personal':
-            return form.full_name.trim().length > 1 && form.nationality.trim().length > 1;
+            return form.full_name.trim().length > 1
+                && form.nationality.trim().length > 1
+                && !!form.date_of_birth
+                && form.present_address.trim().length > 1
+                && form.occupation.trim().length > 1;
         case 'passport':
-            return true; // documents optional at this stage
+            return form.passport_number.trim().length > 1 && !!form.passport_expiry && !!form.passport_scan;
         case 'contact':
-            return /^\S+@\S+\.\S+$/.test(form.email);
+            return /^\S+@\S+\.\S+$/.test(form.email) && form.phone.trim().length > 4;
         default:
             return true;
     }
@@ -69,8 +76,8 @@ function onFile(field, e) {
 
 // Which step each field belongs to, so we can jump back to a server error.
 const fieldStep = {
-    visa_type: 0, travellers: 0, travel_date: 0,
-    full_name: 1, date_of_birth: 1, gender: 1, nationality: 1,
+    visa_type: 0, travellers: 0, travel_date: 0, purpose: 0,
+    full_name: 1, date_of_birth: 1, gender: 1, nationality: 1, present_address: 1, occupation: 1,
     passport_number: 2, passport_expiry: 2, passport_scan: 2, photo: 2,
     email: 3, phone: 3, notes: 3,
 };
@@ -173,6 +180,11 @@ const fileName = (f) => (f ? f.name : '');
                             <p v-if="form.errors.travel_date" class="mt-1 text-xs text-red-500">{{ form.errors.travel_date }}</p>
                         </div>
                     </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700">Purpose of travel</label>
+                        <input v-model="form.purpose" type="text" placeholder="e.g. Tourism, Business meeting, Family visit" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
+                        <p v-if="form.errors.purpose" class="mt-1 text-xs text-red-500">{{ form.errors.purpose }}</p>
+                    </div>
                 </section>
 
                 <!-- STEP 2: PERSONAL -->
@@ -203,6 +215,16 @@ const fileName = (f) => (f ? f.name : '');
                             <input v-model="form.nationality" type="text" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
                             <p v-if="form.errors.nationality" class="mt-1 text-xs text-red-500">{{ form.errors.nationality }}</p>
                         </div>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700">Present address</label>
+                        <input v-model="form.present_address" type="text" placeholder="House, road, area, city" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
+                        <p v-if="form.errors.present_address" class="mt-1 text-xs text-red-500">{{ form.errors.present_address }}</p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700">Occupation</label>
+                        <input v-model="form.occupation" type="text" placeholder="e.g. Business, Student, Service" class="w-full rounded-xl border-slate-200 focus:border-brand-purple focus:ring-brand-purple" />
+                        <p v-if="form.errors.occupation" class="mt-1 text-xs text-red-500">{{ form.errors.occupation }}</p>
                     </div>
                 </section>
 

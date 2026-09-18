@@ -28,6 +28,8 @@ const personal = [
     field('Date of birth', a.date_of_birth),
     field('Gender', a.gender),
     field('Nationality', a.nationality),
+    field('Occupation', a.occupation),
+    field('Present address', a.present_address),
 ];
 const passport = [
     field('Passport number', a.passport_number),
@@ -37,6 +39,7 @@ const trip = [
     field('Visa type', a.visa_type),
     field('Travellers', a.travellers),
     field('Intended travel', a.travel_date),
+    field('Purpose of travel', a.purpose),
 ];
 const contact = [
     field('Email', a.email),

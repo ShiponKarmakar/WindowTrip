@@ -13,6 +13,9 @@ const form = useForm({
     date_of_birth: a.date_of_birth || '',
     gender: a.gender || '',
     nationality: a.nationality,
+    present_address: a.present_address || '',
+    occupation: a.occupation || '',
+    purpose: a.purpose || '',
     passport_number: a.passport_number || '',
     passport_expiry: a.passport_expiry || '',
     email: a.email,
@@ -60,6 +63,9 @@ function submit() {
                         <select v-model="form.gender" class="inp"><option value="">—</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
                     </div>
                     <div><label class="lbl">Nationality</label><input v-model="form.nationality" class="inp" /></div>
+                    <div><label class="lbl">Occupation</label><input v-model="form.occupation" class="inp" /></div>
+                    <div class="sm:col-span-2"><label class="lbl">Present address</label><input v-model="form.present_address" class="inp" /></div>
+                    <div class="sm:col-span-2"><label class="lbl">Purpose of travel</label><input v-model="form.purpose" class="inp" /></div>
                     <div><label class="lbl">Passport number</label><input v-model="form.passport_number" class="inp uppercase" /></div>
                     <div><label class="lbl">Passport expiry</label><input v-model="form.passport_expiry" type="date" class="inp" /></div>
                 </div>

@@ -53,15 +53,18 @@ class VisaApplicationController extends Controller
             'travellers' => ['required', 'integer', 'min:1', 'max:20'],
             'travel_date' => ['nullable', 'date', 'after_or_equal:today'],
             'full_name' => ['required', 'string', 'max:120'],
-            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'date_of_birth' => ['required', 'date', 'before:today'],
             'gender' => ['nullable', 'string', 'max:20'],
             'nationality' => ['required', 'string', 'max:60'],
-            'passport_number' => ['nullable', 'string', 'max:30'],
-            'passport_expiry' => ['nullable', 'date', 'after:today'],
+            'present_address' => ['required', 'string', 'max:200'],
+            'occupation' => ['required', 'string', 'max:80'],
+            'purpose' => ['required', 'string', 'max:120'],
+            'passport_number' => ['required', 'string', 'max:30'],
+            'passport_expiry' => ['required', 'date', 'after:today'],
             'email' => ['required', 'email', 'max:120'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:2000'],
-            'passport_scan' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'passport_scan' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             'photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
         ]);
 
@@ -73,8 +76,8 @@ class VisaApplicationController extends Controller
         $application->country = $country;
         $application->fill(collect($data)->only([
             'visa_type', 'travellers', 'travel_date', 'full_name', 'date_of_birth',
-            'gender', 'nationality', 'passport_number', 'passport_expiry',
-            'email', 'phone', 'notes',
+            'gender', 'nationality', 'present_address', 'occupation', 'purpose',
+            'passport_number', 'passport_expiry', 'email', 'phone', 'notes',
         ])->toArray());
 
         // Store documents privately (not web-accessible directly).
